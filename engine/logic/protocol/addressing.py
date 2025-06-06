@@ -95,3 +95,31 @@ class ProtoSignature:
     
     def sign(self, text):
         return "\n".join([f"{self._start}{line}{self._end}" for line in text.split("\n")])
+    
+
+_filter = None
+_signature = None
+
+def get_filter():
+    """Get the singleton instance of ProtoFilter.
+    If the instance does not exist, it will be created.
+
+    Returns:
+        ProtoFilter: The singleton instance of ProtoFilter.
+    """
+    global _filter
+    if _filter is None:
+        _filter = ProtoFilter()
+    return _filter
+
+def get_signature():
+    """Get the singleton instance of ProtoSignature.
+    If the instance does not exist, it will be created.
+
+    Returns:
+        ProtoSignature: The singleton instance of ProtoSignature.
+    """
+    global _signature
+    if _signature is None:
+        _signature = ProtoSignature()
+    return _signature

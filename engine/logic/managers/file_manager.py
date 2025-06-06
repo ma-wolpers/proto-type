@@ -2,12 +2,9 @@ import os  # Import the os module for file operations
 import json
 
 # FilesManager class
-class FilesManager:
-    def __init__(self, network, private=""):
-        #self.private_path = private.strip("/")+"/"
-        self.__network_path = network
-        self._ensure_file_exists(self.__network_path)  # Ensure the selected file exists
-        self._last_checked_timestamp = 0
+class FileManager:
+    def __init__(self):
+        self.__network_path = "./data/wan.net"  # Default path for the network file
     
     def update(self, network=""):
         if network:
@@ -63,6 +60,19 @@ class FilesManager:
             f.write(text)
         return filepath
 
+_filemanager = FileManager()  # Create a global instance of FileManager
+def get_filemanager():
+    """
+    Returns the global instance of FileManager.
+    If the instance does not exist, it creates a new one.
+    
+    Returns:
+        FileManager: The global instance of FileManager.
+    """
+    global _filemanager
+    if _filemanager is None:
+        _filemanager = FileManager()
+    return _filemanager
 
 
 

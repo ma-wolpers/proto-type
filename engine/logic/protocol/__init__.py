@@ -1,4 +1,4 @@
 # engine/logic/protocol/__init__.py
-from .bin_coder import BinaryCoder
-from .addressing import ProtoFilter as Filter
-from .addressing import ProtoSignature as Signature
+from .bin_coder import get_bicoder as bicoder
+from .addressing import get_filter as filter
+from .addressing import get_signature as signature

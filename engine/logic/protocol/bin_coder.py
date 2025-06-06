@@ -238,48 +238,48 @@ class BinaryCoder:
     #                 i += 1
     #     return text
 
-    def decode_text(self, binary_code, warn=False):
-        if not (binary_code and self.__code_dict):
-            return binary_code
+    def decode_text(self, binary_text):
+        """Decode a binary code into text.
+        
+        Parameters:
+            binary_text (str): The binary code to decode.
+        Returns:
+            str: The decoded text or the original binary code if decoding fails.
+        """
+        if not (binary_text and self.__code_dict):
+            return binary_text
         if not self.__code_length:
-            return self.dec_wo_length(binary_code, warn=warn)
+            return self.dec_wo_length(binary_text)
         else:
-            return self.dec_with_length(binary_code, warn=warn)
+            return self.dec_with_length(binary_text)
     
-    def dec_with_length(self, binary_code, warn=False):
+    def dec_with_length(self, binary_text):
         """Decode a binary code considering the code length.
 
         Parameters:
-            binary_code (str): The binary code to decode.
-            warn (bool): If True, raises a Warning if the code cannot be decoded.
-        Raises:
-            Warning: If the binary code cannot be decoded and warn is True.
+            binary_text (str): The binary code to decode.
         Returns:
             str: The decoded text or the original binary code if decoding fails.
         """
 
+        if not isinstance(self.__code_length, int) or self.__code_length < 1:
+            raise Warning("Dekodierprozess", "Ungültige Code-Länge!")
         # reverse the code dictionary for decoding
         revdict = {v: k for k, v in self.__code_dict.items()}
         # Check if all binary codes in the dictionary have the correct length
         for bcode in revdict.keys():
             if len(bcode) != self.__code_length:
                 raise Warning("Dekodierprozess", f"Binärcode \"{bcode}\" von \"{revdict[bcode]}\" hat nicht die Länge {self.__code_length}!")
-        for k in range(0, len(binary_code), self.__code_length):
-            if k + self.__code_length > len(binary_code):
-                if warn:
-                    raise Warning("Dekodierprozess", f"\"{binary_code[k:]}\" nicht dekodierbar")
-                return binary_code
-            code = binary_code[k:k + self.__code_length]
+        text = ""
+        for k in range(0, len(binary_text), self.__code_length):
+            if k + self.__code_length > len(binary_text):
+                return binary_text
+            code = binary_text[k:k + self.__code_length]
             if code in revdict:
                 word = revdict[code]
             else:
-                if warn:
-                    raise Warning("Dekodierprozess", f"\"{code}\" nicht dekodierbar")
                 word = code
-            if k == 0:
-                text = word
-            else:
-                text += word
+            text += word
         return text
 
             
@@ -299,21 +299,20 @@ class BinaryCoder:
         # reverse the code dictionary for decoding
         revdict = {v: k for k, v in self.__code_dict.items()}
         n = len(binary_code)
-        max_code_len = max(len(code) for code in revdict)
-        # dp[i] = (prev_index, word) if binary_code[:i] can be decoded, else None
-        dp = [None] * (n + 1)
-        dp[0] = (None, None)
+        # dp[i] = (prev_index, word) if binary_code[:i] can be decoded, else (0, ""))
+        dp = [(0, "") for _ in range(n + 1)]
+        max_code_len = max(len(code) for code in revdict.keys())
 
         for i in range(1, n + 1):
             for l in range(1, max_code_len + 1):
                 if i - l < 0:
                     continue
                 code = binary_code[i - l:i]
-                if code in revdict and dp[i - l] is not None:
+                if code in revdict and dp[i - l] != (0, ""):
                     dp[i] = (i - l, revdict[code])
                     break  # Only need one valid path due to unique decodability
 
-        if dp[n] is not None:
+        if dp[n] != (0, ""):
             # Reconstruct the decoded string
             result = []
             idx = n
@@ -358,7 +357,7 @@ class BinaryCoder:
 
     def decode_data(self, data):
         if type(data) is str:
-            return self.decode_text(data, warn=True)
+            return self.decode_text(data)
         elif type(data) is dict:
             for key in data:
                 data[key] = self.decode_data(data[key])
@@ -385,3 +384,15 @@ class BinaryCoder:
                 raise Warning("", "Nur 0 und 1 erlaubt!")
         else:
             self.encode_data(data)
+
+_bicoder = None
+def get_bicoder():
+    """Get the singleton instance of BinaryCoder.
+
+    Returns:
+        BinaryCoder: The singleton instance of BinaryCoder.
+    """
+    global _bicoder
+    if _bicoder is None:
+        _bicoder = BinaryCoder()
+    return _bicoder

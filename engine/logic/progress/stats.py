@@ -47,3 +47,17 @@ class ProtoStats:
         # Increase the message count
         self._sentcontent += binarytext
         self._sentbitcount += len(binarytext)
+
+
+_stats = None
+def get_stats():
+    """ Returns the global Stats instance, creating it if it doesn't exist.
+    
+    Returns:
+        Stats: The global Stats instance.
+    """
+    global _stats
+    if _stats is None:
+        from engine.logic.managers import filemanager
+        _stats = Stats(filemanager=filemanager)
+    return _stats

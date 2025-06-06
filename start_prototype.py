@@ -1,5 +1,5 @@
-from engine import Prototype
+from engine import ProtoType
 	
 if __name__ == "__main__":
-    app = Prototype()
+    app = ProtoType()
     app.run()

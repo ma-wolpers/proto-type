@@ -1,5 +1,5 @@
 import tkinter as tk  # Import tkinter for GUI elements
-from tkinter import ttk, scrolledtext, filedialog  # Import specific tkinter modules
+from tkinter import ttk, scrolledtext, filedialog, simpledialog  # Import specific tkinter modules
 
 from tkinter import font  # import for the fill-in-the-blank test
 
@@ -24,7 +24,7 @@ class ProtoGUI:
         self.__root.title("ProtoType - Messenger")  # Set window title
         self.__root.geometry("1000x600")
         self.__root.iconbitmap('./lib/favicon.ico')
-        self.__root.resizable(1, 1)
+        self.__root.resizable(True, True)
 
         # Fill the GUI
         self._create_menu()  # Create menu bar
@@ -478,7 +478,7 @@ class ProtoGUI:
         self.flow.gui_change(data={"network":newpath})
 
     def choose_username(self):
-        name = tk.simpledialog.askstring("Benutzername", "Bitte gib einen Nutzernamen an: ")  # Open file dialog
+        name = simpledialog.askstring("Benutzername", "Bitte gib einen Nutzernamen an: ")  # Open file dialog
         self.flow.gui_change(data={"username":name})
 
     def choose_allload(self):
@@ -568,6 +568,7 @@ class ProtoGUI:
         except Warning as w:
             self.show_warning(w.args)
 
+    @staticmethod
     def get_clean_text(tktext):
         return tktext.get("1.0", "end-1c")
 
@@ -868,3 +869,16 @@ class ProtoGUI:
             else: # If the code dictionary frame is hidden
                 self.dict_frame.grid() # Show the code dictionary frame
 
+_gui = None
+def get_gui():
+    """
+    Returns the singleton instance of ProtoGUI.
+    If the instance does not exist, it creates a new one.
+
+    Returns:
+        ProtoGUI: The singleton instance of ProtoGUI.
+    """
+    global _gui
+    if _gui is None:
+        _gui = ProtoGUI()
+    return _gui

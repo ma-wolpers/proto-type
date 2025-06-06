@@ -1,7 +1,7 @@
+from engine import Challenge, FillBlanks, Level, stats, filemanager
+
 class ProtoProgress:
-    def __init__(self, stats, filemanager):
-        self._stats = stats
-        self._filemanager = filemanager        
+    def __init__(self):
         
         self.alllevels = self.load_levels()
 
@@ -10,8 +10,8 @@ class ProtoProgress:
 
         self.unlocked_features = []
 
-    def get_unlocked_features(self):
-        return self.unlock_features.get(self.level, [])
+    # def get_unlocked_features(self):
+    #     return self.unlocked_features.get(self.level, [])
     
     @property
     def level(self):
@@ -21,6 +21,8 @@ class ProtoProgress:
 
     @property
     def challenge(self):
+        if not self.level or self._chlng_id < 0:
+            return None
         if self._chlng_id >= len(self.level.challenges):
             return None
         return self.level.challenges[self._chlng_id]
@@ -36,7 +38,13 @@ class ProtoProgress:
     
     @property
     def chlgdata(self):
-        chlg = self.level.challenges[self._chlng_id]
+        chlg = self.challenge
+        if not chlg:
+            return {
+                'id': self._chlng_id,
+                'title': '',
+                'descr': ''
+            }
         title = chlg.title
         descr = chlg.descr
         return {
@@ -49,7 +57,7 @@ class ProtoProgress:
         self._lvl_id = data.get('level', 0)
         self._chlng_id = data.get('challenge', 0)
 
-    def get(self):
+    def get_ids(self):
         return {
             'level_id': self._lvl_id,
             'challenge_id': self._chlng_id
@@ -67,7 +75,7 @@ class ProtoProgress:
                 If True, the second value is 1 if all challenges are completed, otherwise 0.
                 If False, the second value is the progress of the challenge.
         """
-        if not self.challenge:
+        if not (self.challenge and self.level):
             return False, 0
         if self.challenge.check():
             self._chlng_id += 1
@@ -88,6 +96,8 @@ class ProtoProgress:
         Returns:
             dict: A dictionary containing the text parts and options for the fill-in-the-blanks test.
         """
+        if not self.level or not self.level.fill_blanks:
+            return None
         return self.level.fill_blanks.start()
     
     def score_fb(self, answers):
@@ -100,6 +110,8 @@ class ProtoProgress:
         Returns:
             bool: True if all answers are correct, False otherwise.
         """
+        if not self.level or not self.level.fill_blanks:
+            return False
         if self.level.fill_blanks.solve(answers):
             self.level_up()
             return True
@@ -128,15 +140,29 @@ class ProtoProgress:
         """
         # Load the levels data from the JSON file
         # The filemanager is assumed to have a method load_json that reads a JSON file and returns its content as a dictionary
-        levelsdata = self._filemanager.load_json("data/.progress.json")
+        levelsdata = filemanager().load_json("data/.progress.json")
 
         levels = {}
         for levelid, level in levelsdata.items():
             challenges = []
             for cdata in level['challenges']:
-                new_challenge = ProtoChallenge.parse(data=cdata, stats=self._stats)
+                new_challenge = Challenge.parse(data=cdata, stats=stats())
                 challenges.append(new_challenge)
             levelnum = int(levelid)
-            fillblanktest = ProtoFillBlanks(level['fill_blanks'])
-            levels[levelnum] = ProtoLevel(levelnum, level['title'], challenges, fillblanktest, level['unlock'])
+            fillblanktest = FillBlanks(level['fill_blanks'])
+            levels[levelnum] = Level(levelnum, level['title'], challenges, fillblanktest, level['unlock'])
         return levels
+    
+_progress = None
+def get_progress():
+    """
+    Returns the global instance of ProtoProgress.
+    If the instance does not exist, it creates a new one.
+
+    Returns:
+        ProtoProgress: The global instance of ProtoProgress.
+    """
+    global _progress
+    if _progress is None:
+        _progress = ProtoProgress()
+    return _progress
