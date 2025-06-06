@@ -21,7 +21,7 @@ class ProtoChallenge:
 
     #non static method to generate a new instance of the class based on the data
     @staticmethod
-    def parse(data, stats):
+    def parse(data):
         if not data:
             return None
         if not type(data) is dict:
@@ -29,7 +29,8 @@ class ProtoChallenge:
         title = data.get('title')
         descr = data.get('descr')
         cond_data = data.get('condition')
-        condition = ProtoCondition(cond_data, stats)
+        from . import Condition
+        condition = Condition(cond_data)
         descr = condition.fill_descr(descr)
         return ProtoChallenge(title, condition, descr)
 

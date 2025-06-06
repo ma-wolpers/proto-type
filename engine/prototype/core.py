@@ -14,5 +14,5 @@ class ProtoType:
         Run the main application.
         """
         
-        self.gui.build(self)
+        self.gui.build(self.flow)
         self.flow.run()

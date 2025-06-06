@@ -5,6 +5,8 @@ import json
 class FileManager:
     def __init__(self):
         self.__network_path = "./data/wan.net"  # Default path for the network file
+        self._last_checked_timestamp = 0
+
     
     def update(self, network=""):
         if network:

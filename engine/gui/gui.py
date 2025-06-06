@@ -23,7 +23,7 @@ class ProtoGUI:
         self.__root = tk.Tk() # Create the main window
         self.__root.title("ProtoType - Messenger")  # Set window title
         self.__root.geometry("1000x600")
-        self.__root.iconbitmap('./lib/favicon.ico')
+        self.__root.iconbitmap('./engine/gui/favicon.ico')
         self.__root.resizable(True, True)
 
         # Fill the GUI

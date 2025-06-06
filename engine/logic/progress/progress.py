@@ -1,4 +1,4 @@
-from engine import Challenge, FillBlanks, Level, stats, filemanager
+from . import Challenge, FillBlanks, Level
 
 class ProtoProgress:
     def __init__(self):
@@ -138,15 +138,14 @@ class ProtoProgress:
         Returns:
             dict: A dictionary containing the levels, where the keys are level IDs and the values are ProtoLevel objects.
         """
-        # Load the levels data from the JSON file
-        # The filemanager is assumed to have a method load_json that reads a JSON file and returns its content as a dictionary
+        from .. import filemanager
         levelsdata = filemanager().load_json("data/.progress.json")
 
         levels = {}
         for levelid, level in levelsdata.items():
             challenges = []
             for cdata in level['challenges']:
-                new_challenge = Challenge.parse(data=cdata, stats=stats())
+                new_challenge = Challenge.parse(data=cdata)
                 challenges.append(new_challenge)
             levelnum = int(levelid)
             fillblanktest = FillBlanks(level['fill_blanks'])

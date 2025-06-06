@@ -1,4 +1,5 @@
-from engine import bicoder, filemanager, filter, signature, stats, progress, settings, gui, Achievement as ProtoAchievement
+from . import bicoder, filemanager, filter, signature, stats, progress, settings, Achievement as ProtoAchievement
+from .. import gui
 
 class ProtoFlow:
     def __init__(self):

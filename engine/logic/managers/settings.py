@@ -1,4 +1,5 @@
-from engine import filemanager, bicoder, filter, signature, stats, progress
+from . import filemanager
+from .. import bicoder, filter, signature, stats, progress
 import json
 
 class ProtoSettings:
