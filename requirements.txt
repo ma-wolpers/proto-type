@@ -1,0 +1,5 @@
+# Python dependencies
+json
+random
+os
+tkinter

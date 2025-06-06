@@ -1,0 +1,164 @@
+{
+    "1": {
+        "title": "Erste Schritte",
+        "unlock": [],
+        "challenges": [
+            {
+                "title": "Knöpfe drücken",
+                "descr": "Benutze die Knöpfe, um {?} Signale in das Netz zu schicken.",
+                "condition": {
+                    "source": "sent_bits",
+                    "comparator": ">=",
+                    "value": "8"
+                }
+            },
+            {
+                "title": "Knöpfe drücken",
+                "descr": "Benutze die Knöpfe, um {?} Einsen in das Netz zu schicken.",
+                "condition": {
+                    "source": "sent_1s",
+                    "comparator": ">=",
+                    "value": "8"
+                }
+            },
+            {
+                "title": "Knöpfe drücken",
+                "descr": "Benutze die Knöpfe, um {?} Nullen in das Netz zu schicken.",
+                "condition": {
+                    "source": "sent_0s",
+                    "comparator": ">=",
+                    "value": "8"
+                }
+            },
+            {
+                "title": "Wörter schreiben",
+                "descr": "Benutze die Knöpfe, um die Bitfolge \"{?}\" zu versenden.",
+                "condition": {
+                    "source": "sent_content",
+                    "comparator": "endswith",
+                    "random":  {
+                        "type": "bits",
+                        "length": 4,
+                        "symmetry": 1
+                    }
+                }
+            }
+        ],
+        "fill_blanks": {
+            "text_parts" : [
+                "Ihr habt jetzt schon viel mit Programmiersprachen gearbeitet - insbesondere Python. Das ist eine ",
+                " Programmiersprache, die ",
+                " verwendet."
+            ],
+            "options" : [
+                ["flexible", "witzige", "tote", "aggressive"],
+                ["Einrückungen", "Schlangen", "Elektroschocks"]
+            ]
+        }
+    },
+    "2": {
+        "title": "Nachricht. Over.",
+        "unlock": ["eol"],
+        "challenges": [
+            {
+                "title": "Wörter schreiben",
+                "descr": "Benutze die Knöpfe, um im Netz die Bitfolge \"{?}\" zu erzeugen.",
+                "condition": {
+                    "source": "sent_content",
+                    "comparator": "endswith",
+                    "random":  {
+                        "type": "bits",
+                        "length": 4,
+                        "symmetry": 2
+                    }
+                }
+            }
+        ],
+        "fill_blanks": {
+            "text_parts" : [
+                "Python ist natürlich, unmissverständlich und grandioserweise (hab ich zuviel versprochen?) eine ",
+                "Programmiersprache, die ",
+                " verwendet."
+            ],
+            "options" : [
+                ["interessante", "tote", "aggressive"],
+                ["Einrückungen", "Schlangen", "Elektroschocks"]
+            ]
+        }
+    },
+    "3": {
+        "title": "Stück für Stück",
+        "unlock": ["textfield"],
+        "challenges": [
+            {
+                "title": "Wörter schreiben",
+                "descr": "Benutze die Knöpfe, um die Bitfolge \"{?}\" zu versenden.",
+                "condition": {
+                    "source": "sent_content",
+                    "comparator": "endswith",
+                    "random":  {
+                        "type": "bits",
+                        "length": 20,
+                        "symmetry": 1
+                    }
+                }
+            }
+        ],
+        "fill_blanks": {
+            "text_parts" : [
+                "Python ist natürlich, unmissverständlich und grandioserweise (hab ich zuviel versprochen?) eine ",
+                "Programmiersprache, die ",
+                " verwendet."
+            ],
+            "options" : [
+                ["interessante", "tote", "aggressive"],
+                ["Einrückungen", "Schlangen", "Elektroschocks"]
+            ]
+        }
+    },
+    "4": {
+        "title": "Was heißt das?",
+        "unlock": ["dictionary"],
+        "challenges": [],
+        "fill_blanks": {
+            "text_parts" : [],
+            "options" : []                
+        }
+    },
+    "5": {
+        "title": "Die gleiche Sprache",
+        "unlock": ["auto_decoding"],
+        "challenges": [],
+        "fill_blanks": {
+            "text_parts" : [],
+            "options" : []                
+        }
+    },
+    "6": {
+        "title": "Kommunikation",
+        "unlock": ["auto_encoding"],
+        "challenges": [],
+        "fill_blanks": {
+            "text_parts" : [],
+            "options" : []                
+        }
+    },
+    "7": {
+        "title": "Störgeräusche",
+        "unlock": ["filtering"],
+        "challenges": [],
+        "fill_blanks": {
+            "text_parts" : [],
+            "options" : []                
+        }
+    },
+    "8": {
+        "title": "Unbekannter Absender",
+        "unlock": ["signatures"],
+        "challenges": [],
+        "fill_blanks": {
+            "text_parts" : [],
+            "options" : []                
+        }
+    }
+}

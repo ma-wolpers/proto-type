@@ -1,0 +1,28 @@
+{
+    "code_dict": {
+        "h": "1101",
+        "a": "0001",
+        "l": "0010",
+        "o": "1100",
+        "hallo! :)": "1010"
+    },
+    "signature": {
+        "start": "al",
+        "end": ""
+    },
+    "filter": {
+        "starts": "0",
+        "ends": "",
+        "contains": ""
+    },
+    "xp": 0.0,
+    "achievements": {
+        "unlocked": [],
+        "locked": [
+            "First message sent",
+            "10 messages sent",
+            "First message encoded"
+        ]
+    },
+    "username": "Neu"
+}

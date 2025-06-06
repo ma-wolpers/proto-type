@@ -1,0 +1,31 @@
+{
+    "code_dict": {
+        "Osterglocke": "0110",
+        "a": "0000",
+        "h": "0001",
+        "o": "0010",
+        "l": "0011",
+        "Tulpe": "1000",
+        "700": "1110",
+        " ": "1010"
+    },
+    "signature": {
+        "start": "hallo",
+        "end": ""
+    },
+    "filter": {
+        "starts": "hallo",
+        "ends": "",
+        "contains": ""
+    },
+    "xp": 100.0,
+    "achievements": {
+        "unlocked": [
+            "First message sent",
+            "First message encoded",
+            "10 messages sent"
+        ],
+        "locked": []
+    },
+    "username": "Samwolpers"
+}

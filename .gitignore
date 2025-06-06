@@ -1,0 +1,12 @@
+# Files/folders to ignore in git
+
+# programming helpers
+/bin
+/tests
+
+# Python-Zeugs
+__pycache__/
+*.pyc
+
+# Virtuelle Umgebung
+.venv/

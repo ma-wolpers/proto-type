@@ -1,0 +1,22 @@
+{
+    "code_dict": {},
+    "signature": {
+        "start": "",
+        "end": ""
+    },
+    "filter": {
+        "starts": "",
+        "ends": "",
+        "contains": ""
+    },
+    "xp": 0.0,
+    "achievements": {
+        "unlocked": [],
+        "locked": [
+            "First message sent",
+            "10 messages sent",
+            "First message encoded"
+        ]
+    },
+    "username": "Neu"
+}

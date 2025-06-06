@@ -1,0 +1,4 @@
+class ProtoHelper:
+    def __init__(self, app):
+        self.app = app
+
