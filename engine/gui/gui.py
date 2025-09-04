@@ -5,6 +5,9 @@ from tkinter import font  # import for the fill-in-the-blank test
 
 class ProtoGUI:
     def __init__(self):
+        """
+        Initialize the GUI default values.
+        """
         # Initialize the texts and labels
         self.label_binary = "(0en oder 1en)"  # Label for binary input field
         self.label_words = "(kodierbar)"  # Label for words input field
@@ -17,6 +20,12 @@ class ProtoGUI:
         self.overlay_visible = False
     
     def build(self, flow):
+        """
+        Build the GUI components.
+
+        Parameters:
+            flow: The flow controller for the application.
+        """
         self.flow = flow # controller of program flow
         
         # Initialize the application
@@ -32,20 +41,35 @@ class ProtoGUI:
         self.__configure_grid()  # Configure grid layout
 
     def start(self):
+        """
+        Start the GUI main loop.
+        """
         self.periodic_refresh()
         self.__root.mainloop() # necessary to keep the application 'open' and running
 
     def periodic_refresh(self):
+        """
+        Periodically check for changes in the network file.
+        """
         self.flow.network_reload(checkforchanges = True) # Check if the file has been modified since the last check
 
         self.__root.after(1000, self.periodic_refresh)  # Schedule the method to be called again after 1000 milliseconds (1 second)
 
     def initialize_locked_achievements(self, locked_ach):
+        """
+        Initialize the locked achievements tree view.
+
+        Parameters:
+            locked_ach: The list of locked achievements to display.
+        """
         self.locked_achievements_tree.delete(*self.locked_achievements_tree.get_children())  # Clear the treeview
         for ach in locked_ach:
             self.locked_achievements_tree.insert("", "end", iid=ach.title, values=(ach.descr, ach.xp))  # Insert the achievement into the treeview
 
     def unlock_achievement(self, ach):
+        """
+        Unlock an achievement and update the GUI.
+        """
         self.unlocked_achievements_list.insert(tk.END, f"{ach.title} - {ach.descr} ({ach.xp} XP)")
         if self.locked_achievements_tree.exists(ach.title):
             self.locked_achievements_tree.delete(ach.title)
@@ -53,6 +77,9 @@ class ProtoGUI:
 
     # LAYOUT
     def _create_menu(self):
+        """
+        Create the menu bar and its items.
+        """
         self.__root.option_add('*tearOff', False) # Disable tear-off menus
 
         # Create menu bar
@@ -81,6 +108,9 @@ class ProtoGUI:
         settings_menu.add_command(label="Einstellungen importieren", command=self.choose_configimport)  # Add command to load configuration
 
     def _create_widgets(self):
+        """
+        Create the GUI widgets.
+        """
         # Main frame for dynamic resizing
         self._main_frame = ttk.Frame(self.__root)  # Create main frame
         self._main_frame.grid(row=0, column=0, sticky="news")  # Place main frame in grid
@@ -321,7 +351,7 @@ class ProtoGUI:
         self.buttons_frame.grid(row=0, column=0, rowspan=6, sticky="news", padx=5, pady=5)  # Place frame in grid
         self.switch_mode_buttons = []
         self.xp_buttons = []
-        self.toggle_textfield_buttons = []
+        self.toggle_submit_buttons = []
 
         def _placefr_buttons(self, master):
             # Button to enforce a reload of the file content
@@ -329,9 +359,9 @@ class ProtoGUI:
             self.btn_network_reload.grid(row=0, column=0, sticky="", pady=5)  # Place button in grid
             
             # Toggle button to switch between buttons and textfield
-            button = ttk.Button(master, text="", command=self.toggle_textfield)
+            button = ttk.Button(master, text="", command=self.toggle_submit)
             button.grid(row=1, column=0, sticky="", pady=5)
-            self.toggle_textfield_buttons.append(button)
+            self.toggle_submit_buttons.append(button)
             
             # Toggle button to switch between binary and words
             button = ttk.Button(master, text="", command=self.try_switch_mode)
@@ -388,6 +418,9 @@ class ProtoGUI:
         _placefr_buttons(self, self.buttonsoverlay_frame)
 
     def __configure_grid(self):
+        """
+        Configure the grid layout for the main frames.
+        """
         self.col1size = 500
         self._main_frame.grid_columnconfigure(1, minsize=self.col1size)
         self._main_frame.grid_columnconfigure(2, minsize=400)
@@ -397,11 +430,12 @@ class ProtoGUI:
         self.overlay_frame.grid_columnconfigure(0, minsize=280)
         self.progress_frame.grid_rowconfigure(2, minsize=150)
         
-        
-        
-        """ Right now I'm allowing the program to be resized.
-         """
-        
+
+
+        """
+        Right now I'm allowing the program to be resized.
+        """
+
         # Configure fitting & resizing of the grid
         self.__root.grid_rowconfigure(0, weight=1)
         self.__root.grid_columnconfigure(0, weight=1)
@@ -474,26 +508,44 @@ class ProtoGUI:
 
     # PROMPTERS
     def choose_network(self):
+        """
+        Prompt the user to choose a network file.
+        """
         newpath = filedialog.askopenfilename(filetypes=[("Netzwerk", "*.net")])  # Open file dialog
         self.flow.gui_change(data={"network":newpath})
 
     def choose_username(self):
+        """
+        Prompt the user to choose a username.
+        """
         name = simpledialog.askstring("Benutzername", "Bitte gib einen Nutzernamen an: ")  # Open file dialog
         self.flow.gui_change(data={"username":name})
 
     def choose_allload(self):
+        """
+        Prompt the user to choose a file to load all data.
+        """
         filepath = filedialog.askopenfilename(filetypes=[("Benutzerdatei", "*.user")])  # Open file dialog
         self.flow.load_all(filepath)
 
     def choose_allsave(self):
+        """
+        Prompt the user to choose a file to save all data.
+        """
         filepath = filedialog.asksaveasfilename(defaultextension=".user", filetypes=[("Benutzerdatei", "*.user")])
         self.flow.save_all(filepath)
 
     def choose_configimport(self):
+        """
+        Prompt the user to choose a configuration file to import.
+        """
         filepath = filedialog.askopenfilename(filetypes=[("Konfiguration", "*.config")])  # Open file dialog
         self.flow.import_config(filepath)
 
     def choose_configexport(self):
+        """
+        Prompt the user to choose a configuration file to export.
+        """
         filepath = filedialog.asksaveasfilename(defaultextension=".config", filetypes=[("Konfiguration", "*.config")])
         self.flow.export_config(filepath)
         
@@ -503,6 +555,9 @@ class ProtoGUI:
     # Communication with Flow
 
     def update(self, data={}):
+        """
+        Update the GUI elements based on the provided data.
+        """
         if "username" in data:
             username = data["username"]
             self.username_label.config(text=f"Benutzer: {username}")
@@ -550,6 +605,9 @@ class ProtoGUI:
             self.progress_bar.config(value=data["chlg_bar"])
 
     def notify_eol(self, event):
+        """
+        Notify the flow about the updated end-of-line (EOL) character.
+        """
         try:
             self.flow.gui_change(data={"eol":self.eol_entry.get()})
             self.show_message(text="Zeilenende aktualisiert", warn=False)
@@ -557,6 +615,9 @@ class ProtoGUI:
             self.show_warning(w.args)
 
     def notify_code_length(self, event):
+        """
+        Notify the flow about the updated code length.
+        """
         try:
             newlength = self.code_length_entry.get()
             try:
@@ -570,9 +631,15 @@ class ProtoGUI:
 
     @staticmethod
     def get_clean_text(tktext):
+        """
+        Get the clean text from a Tkinter Text widget.
+        """
         return tktext.get("1.0", "end-1c")
 
     def notify_dict(self, event):
+        """
+        Notify the flow about the updated dictionary.
+        """
         try:
             self.flow.gui_change(data={"code_text":ProtoGUI.get_clean_text(self.code_field)})
             self.show_message(text="Wörterbuch aktualisiert", warn=False)
@@ -580,6 +647,9 @@ class ProtoGUI:
             self.show_warning(w.args)
 
     def notify_filter(self, event):
+        """
+        Notify the flow about the updated filter settings.
+        """
         filter = {}
         for mode in self.filter_fields:
             filter[mode] = self.filter_fields[mode].get()
@@ -590,6 +660,9 @@ class ProtoGUI:
             self.show_warning(w.args)
 
     def notify_signature(self, event):
+        """
+        Notify the flow about the updated signature settings.
+        """
         signature = {}
         for mode in self.signature_fields:
             signature[mode] = self.signature_fields[mode].get()
@@ -606,9 +679,10 @@ class ProtoGUI:
     # Fill in the blank test
     def show_fill_blanks(self, testdata):
         """
-        Zeigt den Lückentext-Bereich an und versteckt die Beschreibung und den Fortschrittsbalken.
+        Show the fill-in-the-blank area and hide the description and progress bar.
+
         Parameters:
-            testdata (dict): Ein Dictionary mit den Daten für den Lückentext, das die Schlüssel "text_parts" und "options" enthält.
+            testdata (dict): A dictionary containing the data (text_parts and options) for the fill-in-the-blank test.
         """
         self.challenge_description.grid_remove()  # Hide the description label
         self.progress_bar.grid_remove()  # Hide the progress bar
@@ -624,10 +698,15 @@ class ProtoGUI:
     @staticmethod
     def create_fill_in_the_blank(text_frame, text_parts, options, frame_width):
         """
-        Erstellt den Lückentext mit Comboboxen.
-        :param text_parts: Liste der Textabschnitte (vor und nach den Lücken).
-        :param options: Liste der Auswahlmöglichkeiten für jede Lücke.
-        :param frame_width: Maximale Breite des Frames in Pixeln.
+        Create the fill-in-the-blank text with comboboxes.
+
+        Parameters:
+            text_parts (list): List of text sections (before and after the blanks).
+            options (list): List of options for each blank.
+            frame_width (int): Maximum width of the frame in pixels.
+
+            Returns:
+                list: A list of comboboxes for the fill-in-the-blank areas.
         """
         comboboxes = []
 
@@ -640,11 +719,16 @@ class ProtoGUI:
 
         def place_text_in_lines(text, font, max_width, starting_width):
             """
-            Platziert den Text in Zeilen, die in den Frame passen. Dabei ist die erste Zeile bereits angefangen, daher also nicht in voller Breite verfügbar.
-            :param text: Der Text, der platziert werden soll.
-            :param font: Schriftart des Textes.
-            :param max_width: Maximale Breite in Pixeln.
-            :param starting_width: Verfügbare Breite in der aktuellen Zeile.
+            Places the text in lines that fit within the frame. The first line is already started, so it is not fully available.
+
+            Parameters:
+                text (str): The text to be placed.
+                font (Font): The font of the text.
+                max_width (int): Maximum width in pixels.
+                starting_width (int): Available width in the current line.
+
+            Returns:
+                list: A list of lines with the placed text.
             """
             lines = []
             avaliable_width = starting_width
@@ -717,14 +801,14 @@ class ProtoGUI:
 
     def submit_answers(self):
         """
-        Übergibt die Antworten an die Flow-Klasse.
+        Collects the answers from the comboboxes and submits them to the flow.
         """
         answers = [combobox.get() for combobox in self.comboboxes]
         self.flow.submit_answers(answers)
 
     def end_fill_blanks(self):
         """
-        Schließt den Lückentext-Bereich und zeigt die Beschreibung und den Fortschrittsbalken wieder an.
+        Closes the fill-in-the-blank area and shows the description and progress bar again.
         """
         self.fill_blank_frame.grid_remove()
         for combobox in self.comboboxes:
@@ -738,7 +822,13 @@ class ProtoGUI:
     # TEXT FIELDS
 
     def display(self, content={}):
-        
+        """
+        Display content in the appropriate text fields.
+
+        Parameters:
+            content (dict): The content to be displayed, with keys for each text field.
+        """
+
         def insert(display, content, replace=True):
             display.config(state="normal")
             if replace:
@@ -767,6 +857,13 @@ class ProtoGUI:
     # Warnings and messages
 
     def show_message(self, text="", warn=True): # Remove warning if valid
+        """
+        Shows a message in the warning label.
+
+        Parameters:
+            text (str): The message text to display.
+            warn (bool): Whether the message is a warning (True) or a success message (False).
+        """
         if text:
             if warn:
                 self.warning_label.config(text="❌ "+text, foreground="red")
@@ -776,6 +873,12 @@ class ProtoGUI:
             self.warning_label.config(text="")
             
     def show_warning(self, args):
+        """
+        Shows a warning message in the warning label.
+
+        Parameters:
+            args (tuple): A tuple containing the warning title and message.
+        """
         self.show_message(text=f"{args[0]}: {args[1]}")
 
 
@@ -785,12 +888,22 @@ class ProtoGUI:
     # Event handlers
 
     def on_enter(self, event):
+        """
+        Handles the Enter key event in the input field.
+        If Shift is pressed, a normal line break is allowed.
+
+        Parameters:
+            event (tk.Event): The event object containing information about the key press.
+        """
         if event.state & 0x1:  # Check if Shift is pressed
             return  # Keep normal line break function
         self.submit_text()
         return "break"  # Prevent a new line from being created
     
     def submit_text(self):
+        """
+        Submits the text from the input field to the flow.
+        """
         try:
             self.flow.check_and_submit(ProtoGUI.get_clean_text(self.input_field))  # Send message
         except Warning as w:
@@ -802,7 +915,13 @@ class ProtoGUI:
 
     # Togglers
 
-    def toggle_textfield(self, init=False):
+    def toggle_submit(self, init=False):
+        """
+        Toggles the submission field mode between binary buttons and text field.
+
+        Parameters:
+            init (bool): Whether to initialize the mode (True, default) or toggle it (False).
+        """
         if init:
             self.mode_textfield = False # At the initialisation set to textfield
         else:
@@ -810,21 +929,30 @@ class ProtoGUI:
         if self.mode_textfield:
             self.submit_frame_buttons.grid_remove()
             self.submit_frame_field.grid()
-            for button in self.toggle_textfield_buttons:
+            for button in self.toggle_submit_buttons:
                 button.config(text="-> Knöpfe")
         else:
             self.submit_frame_field.grid_remove()
             self.submit_frame_buttons.grid()
-            for button in self.toggle_textfield_buttons:
+            for button in self.toggle_submit_buttons:
                 button.config(text="-> Feld")
 
     def try_switch_mode(self):
+        """
+        Tries to switch the mode of the flow.
+        """
         try:
             self.flow.switch_mode()
         except Warning as w:
             self.show_warning(w.args)
 
     def adjust_tomode(self, binary):
+        """
+        Adjusts the UI elements to match the current mode.
+
+        Parameters:
+            binary (bool): Whether the mode is binary (True) or text (False).
+        """
         if binary:
             #self.filter_entry_words.grid_remove()
             self.filter_label.config(text="Filter "+self.label_binary+":")
@@ -841,6 +969,9 @@ class ProtoGUI:
                 button.config(text="-> Binär")
     
     def toggle_overlay(self):
+        """
+        Toggles the visibility of the log frame.
+        """
         self.overlay_visible = not self.overlay_visible
         if self.overlay_visible:
             self.overlay_frame.lift()
@@ -851,23 +982,32 @@ class ProtoGUI:
             for button in self.xp_buttons:
                 button.config(text="Zeige XP")
 
-    def toggle_addressing(self): # Toggle the visibility of the filters area
-        if self.address_frame.winfo_ismapped(): # Check if the filters frame is visible
-            self.address_frame.grid_remove() # Hide the filters frame
-        else: # If the filters frame is hidden
-            self.address_frame.grid() # Show the filters frame
+    def toggle_addressing(self):
+        """
+        Toggles the visibility of the addressing frame.
+        """
+        if self.address_frame.winfo_ismapped(): # Check if the addressing frame is visible
+            self.address_frame.grid_remove() # Hide the addressing frame
+        else: # If the addressing frame is hidden
+            self.address_frame.grid() # Show the addressing frame
 
-    def toggle_eol(self): # Toggle the visibility of the signatures area
-        if self.eol_frame.winfo_ismapped(): # Check if the signatures frame is visible
-            self.eol_frame.grid_remove() # Hide the signatures frame
-        else: # If the signatures frame is hidden
-            self.eol_frame.grid() # Show the signatures frame
+    def toggle_eol(self):
+        """
+        Toggles the visibility of the end-of-line frame.
+        """
+        if self.eol_frame.winfo_ismapped(): # Check if the end-of-line frame is visible
+            self.eol_frame.grid_remove() # Hide the end-of-line frame
+        else: # If the end-of-line frame is hidden
+            self.eol_frame.grid() # Show the end-of-line frame
 
-    def toggle_code_dict(self): # Toggle the visibility of the code dictionary area
-            if self.dict_frame.winfo_ismapped(): # Check if the code dictionary frame is visible
-                self.dict_frame.grid_remove() # Hide the code dictionary frame
-            else: # If the code dictionary frame is hidden
-                self.dict_frame.grid() # Show the code dictionary frame
+    def toggle_code_dict(self):
+        """
+        Toggles the visibility of the code dictionary frame.
+        """
+        if self.dict_frame.winfo_ismapped(): # Check if the code dictionary frame is visible
+            self.dict_frame.grid_remove() # Hide the code dictionary frame
+        else: # If the code dictionary frame is hidden
+            self.dict_frame.grid() # Show the code dictionary frame
 
 _gui = None
 def get_gui():

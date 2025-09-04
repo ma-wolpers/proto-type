@@ -3,6 +3,10 @@ from .. import bicoder, filter, signature, stats, progress
 import json
 
 class ProtoSettings:
+    """
+    Manages the user and setting data for the application.
+    """
+
     def __init__(self):
         """
         Initialize the settings manager.
@@ -115,7 +119,7 @@ class ProtoSettings:
         data={}
         for x in keys:
             if x=="network":
-                data[x] = filemanager().get_net()
+                data[x] = filemanager().network
             elif x=="eol":
                 data[x] = bicoder().eol
             elif x=="code_text":

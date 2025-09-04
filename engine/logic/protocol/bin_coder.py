@@ -116,6 +116,8 @@ class BinaryCoder:
         return self.__code_dict
     
     def dict_to_text(self):
+        if not self.__code_dict:
+            return ""
         return ", ".join(f'"{k}"={v}' for k, v in self.__code_dict.items()) + ","
 
     def find_common_multiple(self, codewords):

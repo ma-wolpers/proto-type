@@ -1,8 +1,14 @@
 from . import Challenge, FillBlanks, Level
 
 class ProtoProgress:
+    """
+    This class is used to manage the progress of the user through the levels and challenges.
+    """
+
     def __init__(self):
-        
+        """
+        Initializes the ProtoProgress with the available levels and challenges.
+        """
         self.alllevels = self.load_levels()
 
         self._lvl_id = 1
@@ -15,12 +21,24 @@ class ProtoProgress:
     
     @property
     def level(self):
+        """
+        Gets the current level.
+
+        Returns:
+            Level: The current level object, or None if the level is not found.
+        """
         if self._lvl_id > len(self.alllevels):
             return None
         return self.alllevels[self._lvl_id]
 
     @property
     def challenge(self):
+        """
+        Gets the current challenge.
+
+        Returns:
+            Challenge: The current challenge object, or None if the challenge is not found.
+        """
         if not self.level or self._chlng_id < 0:
             return None
         if self._chlng_id >= len(self.level.challenges):
@@ -29,6 +47,12 @@ class ProtoProgress:
 
     @property
     def leveldata(self):
+        """
+        Gets the current level data.
+
+        Returns:
+            dict: A dictionary containing the current level data.
+        """
         id = self._lvl_id
         name = self.alllevels[id].title
         return {
@@ -38,6 +62,12 @@ class ProtoProgress:
     
     @property
     def chlgdata(self):
+        """
+        Gets the current challenge data. If the challenge is not found, an empty dictionary is returned.
+
+        Returns:
+            dict: A dictionary containing the current challenge data.
+        """
         chlg = self.challenge
         if not chlg:
             return {
@@ -54,10 +84,30 @@ class ProtoProgress:
         }
 
     def update(self, data):
-        self._lvl_id = data.get('level', 0)
-        self._chlng_id = data.get('challenge', 0)
+        """
+        Updates the progress data with the given dictionary. If the dictionary is invalid, a warning is raised.
+
+        Parameters:
+            data (dict): A dictionary containing the progress data:
+                "level": The current level ID (int)
+                "challenge": The current challenge ID (int)
+        """
+        if not isinstance(data, dict):
+            print(f"Achtung: {data} ist kein Dictionary!")
+            return
+        if not all(k in data for k in ['level', 'challenge']):
+            print(f"Achtung: {data} enthält nicht alle erforderlichen Schlüssel!")
+            return
+        self._lvl_id = data['level']
+        self._chlng_id = data['challenge']
 
     def get_ids(self):
+        """
+        Gets the current level and challenge IDs.
+
+        Returns:
+            dict: A dictionary containing the current level and challenge IDs.
+        """
         return {
             'level_id': self._lvl_id,
             'challenge_id': self._chlng_id

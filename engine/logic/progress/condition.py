@@ -1,6 +1,16 @@
 import random
 
 class ProtoCondition:
+    """
+    This class represents a condition that can be checked and monitored.
+    
+    Example:
+        condition = ProtoCondition({
+            "source": "sent_bits",
+            "value": 100,
+            "comparator": ">="
+        })
+    """
     def __init__(self, data):
         """Initializes the condition with the provided data.
         
@@ -23,13 +33,26 @@ class ProtoCondition:
         return self._progress()*100
 
     def check(self):
+        """
+        Checks if the condition is met.
+
+        Returns:
+            bool: True if the condition is met, False otherwise.
+        """
         return self._check()
     
     def print(self):
+        """
+        Returns a string representation of the condition.
+
+        Returns:
+            str: A string representation of the condition.
+        """
         return str(self._source()) + " " + self._comparator + " " + str(self._value)
     
     def _parse_data(self):
-        """Parses the condition data to set up the source, value, comparator, and check function.
+        """
+        Parses the condition data to set up the source, value, comparator, and check function.
         
         Raises:
             ValueError: If the data does not contain valid source, value, or comparator.
@@ -76,4 +99,13 @@ class ProtoCondition:
             raise ValueError("Unknown comparator")
         
     def fill_descr(self, descr):
+        """
+        Completes the description with the generated value.
+
+        Parameters:
+            descr (str): The description template containing "{?}" placeholders.
+
+        Returns:
+            str: The filled description with the generated value.
+        """
         return descr.replace("{?}", str(self._value))

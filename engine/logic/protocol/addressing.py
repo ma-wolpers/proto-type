@@ -1,5 +1,21 @@
 class ProtoFilter:
+    """
+    This class is used to filter messages based on their binary representation.
+    It allows you to specify patterns for the start and end of the messages.
+
+    Example:
+        filter = ProtoFilter({
+            "starts": "110",
+            "ends": "001"
+        })
+    """
+
     def __init__(self, filter={}):
+        """Initialize the ProtoFilter with a filter dictionary.
+
+        Parameters:
+            filter (dict): A dictionary containing the filter criteria.
+        """
         self.update(filter)
 
     def update(self, filter):
@@ -80,20 +96,67 @@ class ProtoFilter:
 
 
 class ProtoSignature:
+    """
+    This class is used to represent the signature of a message.
+    It allows you to specify a start and end string that will be added to each message.
+
+    Example:
+        signature = ProtoSignature({
+            "start": "Anna",
+            "end": "Bob"
+        })
+    """
     def __init__(self, signature={}):
+        """
+        Initializes the ProtoSignature with the given signature (a string that is automatically added to each message's start or end).
+
+        Parameters:
+            signature (dict): A dictionary containing the signature information.
+        """
+        self._start = ""
+        self._end = ""
         self.update(signature)
 
     def update(self, signature={}):
+        """
+        Updates the signature with the given dictionary.
+
+        Parameters:
+            signature (dict): A dictionary containing the signature information:
+                "start": The start string (str)
+                "end": The end string (str)
+        """
+        if not isinstance(signature, dict):
+            print(f"Achtung: {signature} ist kein Dictionary!")
+        if not all(isinstance(v, str) for v in signature.values()):
+            print(f"Achtung: {signature} sind keine Strings!")
         self._start = signature.get("start", "")
         self._end = signature.get("end", "")
     
     def get(self):
+        """
+        Gets the signature information as a dictionary.
+
+        Returns:
+            dict: A dictionary containing the signature information:
+                "start": The start string (str)
+                "end": The end string (str)
+        """
         return {
             "start": self._start,
             "end": self._end
         }
     
     def sign(self, text):
+        """
+        Signs the given text by adding the start and end strings.
+
+        Parameters:
+            text (str): The text to sign.
+
+        Returns:
+            str: The signed text.
+        """
         return "\n".join([f"{self._start}{line}{self._end}" for line in text.split("\n")])
     
 

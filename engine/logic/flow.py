@@ -6,7 +6,6 @@ class ProtoFlow:
         """
         Initialize the ProtoFlow class.
         """
-
         # Initialize variables
         self.mode_binary = True  # Initialize the mode to binary
         self.overlay_visible = False  # Initialize the overlay visibility
@@ -31,6 +30,9 @@ class ProtoFlow:
         
 
     def run(self):
+        """
+        Starts the main program loop.
+        """
         self.xp_max = sum(ach.xp for ach in self.achievements.values())
         self.unlocked_achievements = []
         self.locked_achievements = list(self.achievements.values())
@@ -51,6 +53,12 @@ class ProtoFlow:
 
     # Network operations
     def network_reload(self, checkforchanges=False): #formerly load_file
+        """
+        Updates the displayed network content with the latest setting changes.
+
+        Parameters:
+            checkforchanges (bool): Whether to check for changes in the network file before reloading.
+        """
         _filemanager = filemanager()
         if checkforchanges:
             if not _filemanager.changes_in_network():
@@ -101,6 +109,12 @@ class ProtoFlow:
                 start_index = end_index """
 
     def network_send(self, binary_text): #formerly append_file
+        """
+        Sends the binary text to the network.
+
+        Parameters:
+            binary_text (str): The binary text to send.
+        """
         stats().send_content(binary_text)  # inform the stats manager about the new message
 
         # Append the binary text to the file
@@ -116,6 +130,9 @@ class ProtoFlow:
         self.check_progress()
 
     def network_change(self):
+        """
+        Changes the network file to a new file selected by the user.
+        """
         # Open a file dialog to select a new file
         filepath = gui().choose_network()
         if filepath:  # if a file was selected
@@ -126,6 +143,12 @@ class ProtoFlow:
 
     # Text handlers
     def check_and_submit(self, text):
+        """
+        Checks the submitted text for validity and sends it to the network.
+
+        Parameters:
+            text (str): The text to check and submit.
+        """
         _gui = gui()
         if not text:  # Check if the input field is empty
             _gui.show_message("Kein Text eingegeben!")
@@ -154,6 +177,9 @@ class ProtoFlow:
 
     # Achievement methods
     def check_progress(self):
+        """
+        Checks the progress of the current challenge and sends updates to the GUI.
+        """
         _progress = progress()
         completed, chlgprogress = _progress.check_challenge()
         _gui = gui()
@@ -179,8 +205,6 @@ class ProtoFlow:
 
         Parameters:
             submission (list(str)): The user's submission for the fill-in-the-blanks test.
-        Returns:
-            None
         """
         _gui = gui()
         if progress().score_fb(submission):
@@ -191,6 +215,9 @@ class ProtoFlow:
         self.update_gui(on_keys=["guiprogress"])
         
     def update_xp_bar(self):
+        """
+        Updates the XP bar in the GUI.
+        """
         # Calculate total XP based on unlocked achievements
         total_xp = sum(ach.xp for ach in self.achievements.values() if ach in self.unlocked_achievements)
         xp = total_xp
@@ -199,11 +226,23 @@ class ProtoFlow:
 
     # User functions
     def save_all(self, filepath):
+        """
+        Saves all user data to the specified file.
+
+        Parameters:
+            filepath (str): The path to the file where user data will be saved.
+        """
         if filepath:
             newpath = settings().export_file(filepath) # Write the configuration data to the file
             gui().show_message(text="Konfiguration gespeichert!", warn=False)
 
     def load_all(self, filepath):
+        """
+        Loads all user data from the specified file.
+
+        Parameters:
+            filepath (str): The path to the file from which user data will be loaded.
+        """
         if filepath:
             newkeys = settings().import_file(filepath)
             self.update_gui(on_keys=newkeys)
@@ -213,11 +252,23 @@ class ProtoFlow:
 
     # Configuration functions
     def export_config(self, filepath):
+        """
+        Exports the current configuration to a file.
+
+        Parameters:
+            filepath (str): The path to the file where the configuration will be saved.
+        """
         if filepath: # Check if a file was selected
             newpath = settings().export_file(filepath, user=False) # Write the configuration data to the file
             gui().show_message(text="Konfiguration gespeichert!", warn=False) # Show a success message
 
     def import_config(self, filepath): # Load a configuration from a file
+        """
+        Imports a configuration from a file.
+
+        Parameters:
+            filepath (str): The path to the file from which the configuration will be loaded.
+        """
         if filepath:
             newkeys = settings().import_file(filepath, user=False)
             self.update_gui(on_keys=newkeys)
@@ -225,6 +276,12 @@ class ProtoFlow:
 
     # Togglers
     def switch_mode(self, init=False):
+        """
+        Switches the mode between binary and text.
+
+        Parameters:
+            init (bool): If True, initializes the mode to binary. If False (default), toggles the mode.
+        """
         _gui = gui()
         if init:
             self.mode_binary = True
@@ -247,6 +304,12 @@ class ProtoFlow:
 
     # GUI
     def gui_change(self, data={}):
+        """
+        Handles changes in the GUI and updates the internal state.
+
+        Parameters:
+            data (dict): The data containing the changes to be applied.
+        """
         autosaved = settings().parse_data(data=data)
         self.update_gui(on_keys=list(data))
         if autosaved:
@@ -257,5 +320,8 @@ class ProtoFlow:
         settings().check_integrity(on_keys=list(data), for_binary=self.mode_binary)
 
     def update_gui(self, on_keys=[]):
+        """
+        Updates the GUI with the current state.
+        """
         data = settings().collect_for_gui(keys=on_keys)
         gui().update(data) 
