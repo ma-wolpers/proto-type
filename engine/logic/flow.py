@@ -20,9 +20,9 @@ class ProtoFlow:
         """
         # Example achievements with descriptions and XP points
         self.achievements = {}
-        ach = ProtoAchievement(name="First message sent", condition=lambda: stats().sentmsgcount() >= 1, descr="Send your first message.", xp=10)
+        ach = ProtoAchievement(name="First message sent", condition=lambda: stats().sentmsgcount >= 1, descr="Send your first message.", xp=10)
         self.achievements[ach.title] = ach
-        ach = ProtoAchievement(name="10 messages sent", condition=lambda: stats().sentmsgcount() >= 10, descr="Send 10 messages.", xp=20)
+        ach = ProtoAchievement(name="10 messages sent", condition=lambda: stats().sentmsgcount >= 10, descr="Send 10 messages.", xp=20)
         self.achievements[ach.title] = ach
         ach = ProtoAchievement(name="First message encoded", condition=lambda: 0 >= 1, descr="Encode your first message.", xp=15)
         self.achievements[ach.title] = ach
@@ -42,7 +42,7 @@ class ProtoFlow:
         _gui.choose_username()
         self.update_gui(on_keys=["guiprogress"])
         
-        _gui.toggle_textfield(init=True) # Initialize the input mode to buttons (including removal of the input field, labels and buttons)
+        _gui.toggle_submit(init=True) # Initialize the input mode to buttons (including removal of the input field, labels and buttons)
         self.switch_mode(init=True) # Initialize the input field to binary (including removal of the words fields)
 
         ### LAST COMMAND TO RUN
@@ -165,15 +165,16 @@ class ProtoFlow:
         # Add signatures and eol
         _bicoder = bicoder()
         text = signature().sign(text)
-        text = _bicoder.append_eol(text)
         # Encode the text line by line
         if not self.mode_binary:
             text = _bicoder.encode_text(text)
+        text = _bicoder.append_eol(text)
 
         # Clear input field
         _gui.clear_input()
 
         self.network_send(text)  # Append the binary text to the file
+
 
     # Achievement methods
     def check_progress(self):
@@ -188,17 +189,20 @@ class ProtoFlow:
             stats().reset()
             if chlgprogress == 1: # all challenges completed
                 testdata = _progress.start_fb()
-                _gui.show_fill_blanks(testdata)
+                _gui.start_fill_blanks(testdata)
             else:
                 self.update_gui(on_keys=["guiprogress"])
         _gui.update(data={"chlg_bar":chlgprogress})
         for ach in self.achievements.values():
             if ach.condition() and (ach not in self.unlocked_achievements):
+                print(f"Achievement unlocked: {ach.title}")
+                print("flow line 198")
                 self.unlocked_achievements.append(ach)
                 self.locked_achievements.remove(ach)
                 _gui.unlock_achievement(ach)
                 self.update_xp_bar()
-    
+
+
     def submit_answers(self, submission):
         """
         Check the solution for the fill-in-the-blanks test.
@@ -285,7 +289,7 @@ class ProtoFlow:
         _gui = gui()
         if init:
             self.mode_binary = True
-            _gui.adjust_tomode(self.mode_binary)
+            _gui.adjust_to_input_mode(self.mode_binary)
             return
         
         oldmode_is_binary = self.mode_binary
@@ -298,7 +302,7 @@ class ProtoFlow:
         self.mode_binary = not oldmode_is_binary # Toggle the mode, except at the initialisation: then set to binary
         settings().parse_data(newdata)
         _gui.update(newdata)
-        _gui.adjust_tomode(self.mode_binary)
+        _gui.adjust_to_input_mode(self.mode_binary)
         self.network_reload()
     
 
@@ -313,7 +317,7 @@ class ProtoFlow:
         autosaved = settings().parse_data(data=data)
         self.update_gui(on_keys=list(data))
         if autosaved:
-            gui().show_message (text="automatisch gespeichert", warn=False)
+            gui().show_message(text="automatisch gespeichert", warn=False)
         if any(x in data for x in ["code_text","network","eol","filter","code_length"]):
 
             self.network_reload()

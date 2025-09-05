@@ -1,21 +1,47 @@
 class BinaryCoder:
+    """Class to handle binary encoding and decoding of text using a code dictionary and end-of-line marker."""
+
     def __init__(self, code_dict={}, eol=""):
+        """
+        Initialize the BinaryCoder with a code dictionary and end-of-line marker.
+
+        Parameters:
+            code_dict (dict): The code dictionary to use.
+            eol (str): The end-of-line marker to use.
+        """
         self.__code_dict = code_dict
         self.__eol = eol
         self.__code_length = None # This will be set when the code dictionary is updated
 
     def update_dict(self, code_dict):
+        """
+        Update the code dictionary.
+
+        Parameters:
+            code_dict (dict): The code dictionary to use.
+        """
         self.__code_dict = code_dict
         self.match_code_length_dict()
         return self.__code_dict
 
     def update_eol(self, eol):
+        """
+        Update the end-of-line marker.
+
+        Parameters:
+            eol (str): The end-of-line marker to use.
+        """
         self.__eol = eol
         self.match_code_length_eol()
         return self.__eol
     
     def update_code_length(self, code_length):
-        """Update the code length and adjust the eol and code dictionary accordingly."""
+        """
+        Update the code length and adjust the eol and code dictionary accordingly.
+
+        Parameters:
+            code_length (int): The code length to use.
+        """
         if not code_length:
             self.__code_length = None
             return self.__code_length
@@ -32,6 +58,7 @@ class BinaryCoder:
 
         Raises:
             Warning: If the eol cannot be adjusted to the specified code length.
+
         Returns:
             bool: True if the eol is successfully adjusted, false if the new eol code is already in the dictionary.
         """
@@ -45,6 +72,9 @@ class BinaryCoder:
         return not self.is_in_dict(match) # Ensure the eol is still unique after matching lengths
 
     def match_code_length_dict(self):
+        """
+        Adjust the code dictionary to match the specified code length.
+        """
         if self.__code_length is None:
             return True # No code length set, nothing to match
         # Update the code dictionary to ensure all codes are of the specified length
@@ -60,6 +90,15 @@ class BinaryCoder:
         return True
 
     def match_code_length(self, code):
+        """
+        Match the code to the specified code length.
+
+        Parameters:
+            code (str): The code to match.
+
+        Returns:
+            str|bool: The matched code or False if it cannot be matched.
+        """
         code_length = self.__code_length
         if code_length is None:
             return code # No code length set, nothing to match
@@ -76,16 +115,42 @@ class BinaryCoder:
 
     @property
     def dict(self):
+        """
+        Get the code dictionary.
+
+        Returns:
+            dict: The code dictionary.
+        """
         return self.__code_dict
     @property
     def eol(self):
+        """
+        Get the end-of-line marker.
+
+        Returns:
+            str: The end-of-line marker.
+        """
         return self.__eol
     @property
     def code_length(self):
+        """
+        Get the code length.
+
+        Returns:
+            int: The code length.
+        """
         return self.__code_length
 
     def parse(self, code_text):
-        """Parse the code text and update the code dictionary."""
+        """
+        Parse the code text and update the code dictionary.
+
+        Parameters:
+            code_text (str): The code text to parse.
+
+        Returns:
+            dict: The updated code dictionary.
+        """
         # Read entries from the text field and update the dictionary
         if not code_text:
             self.__code_dict = {}
@@ -116,11 +181,26 @@ class BinaryCoder:
         return self.__code_dict
     
     def dict_to_text(self):
+        """
+        Convert the code dictionary to text format.
+
+        Returns:
+            str: The code dictionary in text format.
+        """
         if not self.__code_dict:
             return ""
         return ", ".join(f'"{k}"={v}' for k, v in self.__code_dict.items()) + ","
 
     def find_common_multiple(self, codewords):
+        """
+        Find a common multiple in the list of codewords using the Sardinas–Patterson algorithm.
+
+        Parameters:
+            codewords (list): The list of codewords to check.
+
+        Returns:
+            str: The common multiple if found, otherwise an empty string.
+        """
         # Sardinas–Patterson algorithm
         track = {}
 
@@ -163,7 +243,6 @@ class BinaryCoder:
         Parameters:
             code_dict (dict): The dictionary containing words and their binary codes.
         """
-
         if not code_dict:
             return None
         
@@ -188,6 +267,7 @@ class BinaryCoder:
 
         Parameters:
             code (str): The binary code to check.
+        
         Returns:
             bool: True if the code is in the dictionary, False otherwise.
         """
@@ -199,6 +279,18 @@ class BinaryCoder:
     
     
     def encode_text(self, text):
+        """
+        Encode the given text using the code dictionary.
+
+        Parameters:
+            text (str): The text to encode.
+
+        Returns:
+            str: The encoded binary code.
+
+        Raises:
+            Warning: If the encoding process fails.
+        """
         if not text:
             return text
         if not self.__code_dict:
@@ -217,7 +309,7 @@ class BinaryCoder:
                     break
             else:
                 raise Warning("Kodierprozess", f"\"{text[i:]}\" nicht kodierbar")
-        return True, binary_code
+        return binary_code
 
     # OLD
     # def decode_text(self, binary_code, warn=False):
@@ -245,6 +337,7 @@ class BinaryCoder:
         
         Parameters:
             binary_text (str): The binary code to decode.
+
         Returns:
             str: The decoded text or the original binary code if decoding fails.
         """
@@ -260,8 +353,12 @@ class BinaryCoder:
 
         Parameters:
             binary_text (str): The binary code to decode.
+
         Returns:
             str: The decoded text or the original binary code if decoding fails.
+
+        Raises:
+            Warning: If the decoding process fails.
         """
 
         if not isinstance(self.__code_length, int) or self.__code_length < 1:
@@ -292,17 +389,18 @@ class BinaryCoder:
         Parameters:
             binary_code (str): The binary code to decode.
             warn (bool): If True, raises a Warning if the code cannot be decoded.
-        Raises:
-            Warning: If the binary code cannot be decoded and warn is True.
         Returns:
             str: The decoded text or the original binary code if decoding fails.
+        Raises:
+            Warning: If the binary code cannot be decoded and warn is True.
         """
 
         # reverse the code dictionary for decoding
         revdict = {v: k for k, v in self.__code_dict.items()}
         n = len(binary_code)
-        # dp[i] = (prev_index, word) if binary_code[:i] can be decoded, else (0, ""))
+        # dp[i] = (prev_index, word) if binary_code[:i] can be decoded, else (0, "")
         dp = [(0, "") for _ in range(n + 1)]
+        dp[0] = (-1, "")  # Base case: empty string can be decoded
         max_code_len = max(len(code) for code in revdict.keys())
 
         for i in range(1, n + 1):
@@ -329,9 +427,27 @@ class BinaryCoder:
             return binary_code
 
     def append_eol(self, text):
+        """
+        Append the end-of-line marker to the text.
+
+        Parameters:
+            text (str): The text to append the end-of-line marker to.
+
+        Returns:
+            str: The text with the end-of-line marker appended.
+        """
         return text+self.__eol
 
     def split_eol(self, binary_code):
+        """
+        Split the binary code into parts using the end-of-line marker.
+
+        Parameters:
+            binary_code (str): The binary code to split.
+
+        Returns:
+            list: A list of binary code parts.
+        """
         if not self.__eol:
             return [binary_code]
         if not self.all_binary(self.__eol):
@@ -358,6 +474,15 @@ class BinaryCoder:
             return binary_code.split(self.__eol)
 
     def decode_data(self, data):
+        """
+        Decode the given data.
+
+        Parameters:
+            data (str | dict): The data to decode.
+
+        Returns:
+            str | dict: The decoded data.
+        """
         if type(data) is str:
             return self.decode_text(data)
         elif type(data) is dict:
@@ -366,6 +491,15 @@ class BinaryCoder:
         return data
 
     def encode_data(self, data):
+        """
+        Encode the given data.
+
+        Parameters:
+            data (str | dict): The data to encode.
+
+        Returns:
+            str | dict: The encoded data.
+        """
         if type(data) is str:
             return self.encode_text(data)
         elif type(data) is dict:
@@ -375,12 +509,31 @@ class BinaryCoder:
 
 
     def all_binary(self, data):
+        """
+        Check if all elements in the data are binary (0 or 1).
+
+        Parameters:
+            data (str | dict): The data to check.
+
+        Returns:
+            bool: True if all elements are binary, False otherwise.
+        """
         if type(data) is str:
             return all(c in "01" for c in data)
         elif type(data) is dict:
             return all(self.all_binary(data[key]) for key in data)
         
     def check_dict_compliance(self, data, for_binary):
+        """
+        Check if the given dictionary complies with the binary encoding rules.
+
+        Parameters:
+            data (dict): The dictionary to check.
+            for_binary (bool): Whether to check for binary compliance.
+
+        Raises:
+            Warning: If the dictionary does not comply with the rules.
+        """
         if for_binary:
             if not self.all_binary(data):
                 raise Warning("", "Nur 0 und 1 erlaubt!")

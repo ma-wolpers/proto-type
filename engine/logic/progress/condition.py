@@ -60,13 +60,13 @@ class ProtoCondition:
         from engine.logic.progress import stats
         strsource = self._data.get("source", None)
         if strsource == "sent_bits":
-            self._source = lambda: str(stats().sentbitcount())
+            self._source = lambda: str(stats().sentbitcount)
         elif strsource == "sent_content":
-            self._source = stats().sentcontent
+            self._source = lambda: stats().sentcontent
         elif strsource == "sent_0s":
-            self._source = lambda: str(stats().sentcontent().count("0"))
+            self._source = lambda: str(stats().sentcontent.count("0"))
         elif strsource == "sent_1s":
-            self._source = lambda: str(stats().sentcontent().count("1"))
+            self._source = lambda: str(stats().sentcontent.count("1"))
         else:
             raise ValueError("Unknown source")
         if "value" in self._data:

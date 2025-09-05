@@ -1,7 +1,6 @@
 import tkinter as tk  # Import tkinter for GUI elements
-from tkinter import ttk, scrolledtext, filedialog, simpledialog  # Import specific tkinter modules
+from tkinter import ttk, filedialog, simpledialog  # Import specific tkinter modules
 
-from tkinter import font  # import for the fill-in-the-blank test
 
 class ProtoGUI:
     def __init__(self):
@@ -11,10 +10,6 @@ class ProtoGUI:
         # Initialize the texts and labels
         self.label_binary = "(0en oder 1en)"  # Label for binary input field
         self.label_words = "(kodierbar)"  # Label for words input field
-
-        # Initialize the XP values
-        self.xp_max = 100  # Maximum XP value
-        self.xp_value = 0  # Current XP value
         
         # Initialize the overlay visibility
         self.overlay_visible = False
@@ -62,17 +57,13 @@ class ProtoGUI:
         Parameters:
             locked_ach: The list of locked achievements to display.
         """
-        self.locked_achievements_tree.delete(*self.locked_achievements_tree.get_children())  # Clear the treeview
-        for ach in locked_ach:
-            self.locked_achievements_tree.insert("", "end", iid=ach.title, values=(ach.descr, ach.xp))  # Insert the achievement into the treeview
+        self.overlay_frame.initialize_locked_achievements(locked_ach)
 
     def unlock_achievement(self, ach):
         """
         Unlock an achievement and update the GUI.
         """
-        self.unlocked_achievements_list.insert(tk.END, f"{ach.title} - {ach.descr} ({ach.xp} XP)")
-        if self.locked_achievements_tree.exists(ach.title):
-            self.locked_achievements_tree.delete(ach.title)
+        self.overlay_frame.unlock_achievement(ach)
 
 
     # LAYOUT
@@ -90,13 +81,9 @@ class ProtoGUI:
         # "Optionen" menu
         options_menu = tk.Menu(menu_bar)  # Create "Optionen" menu
         menu_bar.add_cascade(label="Optionen", menu=options_menu)  # Add "Optionen" menu to the menu bar
-        options_menu.add_command(label="Adressierung aktivieren/deaktivieren", command=self.toggle_addressing)  # Add command to toggle filters
-        options_menu.add_command(label="EOL aktivieren/deaktivieren", command=self.toggle_eol)  # Add command to toggle signatures
-        options_menu.add_command(label="Code-Dictionary aktivieren/deaktivieren", command=self.toggle_code_dict)  # Add command to toggle code dictionary
-        """ # Disable the filter, signature, and code dictionary toggles for now
-        options_menu.entryconfigure("Filter aktivieren/deaktivieren", state="disabled")
-        options_menu.entryconfigure("Signaturen aktivieren/deaktivieren", state="disabled")
-        options_menu.entryconfigure("Code-Dictionary aktivieren/deaktivieren", state="disabled") """
+        options_menu.add_command(label="Adressierung anzeigen/verstecken", command=self.toggle_addressing)  # Add command to toggle filters
+        options_menu.add_command(label="Paketierung anzeigen/verstecken", command=self.toggle_pckg)  # Add command to toggle signatures
+        options_menu.add_command(label="Kodierung anzeigen/verstecken", command=self.toggle_code_dict)  # Add command to toggle code dictionary
 
         # "Einstellungen" menu
         settings_menu = tk.Menu(menu_bar)  # Create "Einstellungen" menu
@@ -111,311 +98,58 @@ class ProtoGUI:
         """
         Create the GUI widgets.
         """
+        from . import ProgressFrame, ToolFrame,DisplayFrame, UserFrame, SubmitFrame, ButtonsFrame, OverlayFrame
+
         # Main frame for dynamic resizing
         self._main_frame = ttk.Frame(self.__root)  # Create main frame
         self._main_frame.grid(row=0, column=0, sticky="news")  # Place main frame in grid
 
 
-
-
         ##### COLUMN 1 #####
 
-        # Lvl information
-
         # Challenge information
-        self.progress_frame = ttk.Frame(self._main_frame)  # Create frame for progress information
+        self.progress_frame = ProgressFrame(self._main_frame, self.flow)
         self.progress_frame.grid(row=0, rowspan=2, column=1, sticky="news", padx=5, pady=5)
 
-        def placefr_progress(self):
-            # Level title
-            self.lvl_title = ttk.Label(self.progress_frame, text="Level Titel")
-            self.lvl_title.grid(row=0, column=0, sticky="w")
-
-            # Help button for current challenge
-            self.challenge_help = ttk.Button(self.progress_frame, text="Hilfe", command=lambda: "self.show_help")
-            self.challenge_help.grid(row=0, column=1, sticky="e")
-
-            # Title of current challenge
-            self.challenge_title = ttk.Label(self.progress_frame, text="Aktuelle Herausforderung")
-            self.challenge_title.grid(row=1, columnspan=2, column=0, sticky="w")
-
-            # Fill-in-the-blank area
-            self.fill_blank_frame = ttk.Frame(self.progress_frame)
-            self.fill_blank_frame.grid(row=2, column=0, columnspan=2, sticky="ew")
-            self.fill_blank_frame.grid_remove()  # Initially hide the fill-in-the-blank area
-
-            # Button to submit the fill-in-the-blank answer
-            self.btn_submit_fill_blank = ttk.Button(self.progress_frame, text="Absenden", command=self.submit_answers)
-            self.btn_submit_fill_blank.grid(row=3, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
-            self.btn_submit_fill_blank.grid_remove()  # Initially hide the button            
-
-            # Description of current challenge
-            self.challenge_description = ttk.Label(self.progress_frame, text="Noch keine Beschreibung vorhanden.")
-            self.challenge_description.grid(row=2, column=0, columnspan=2, sticky="w")
-
-            # Progress bar of current challenge
-            self.progress_bar = ttk.Progressbar(self.progress_frame, orient="horizontal", length=200, mode="determinate")
-            self.progress_bar.grid(row=3, column=0, columnspan=2, sticky="ew", padx=10, pady=5)
-            self.progress_bar["maximum"] = 100
-        placefr_progress(self)
-
-        
         # Warning label
         self.warning_label = ttk.Label(self._main_frame, text="", foreground="red")
         self.warning_label.grid(row=2, column=1, sticky="ws")
 
-
-
-        ## TOOLS AREA ##
-        self.tools_frame = ttk.Frame(self._main_frame)  # Create frame for tools
-        self.tools_frame.grid(row=3, rowspan=3, column=1, sticky="news", padx=5, pady=5)  # Place frame in grid
-
-        # EOL area
-        self.eol_frame = ttk.Frame(self.tools_frame)  # Create frame for EOL
-        self.eol_frame.grid(row=0, column=0, sticky="news")  # Place frame in grid
-
-        def placefr_eol(self):
-            # EOL Binary Code Input
-            self.eol_label = ttk.Label(self.eol_frame, text="Zeilenende:")
-            self.eol_label.grid(row=0, column=0, padx=10, pady=5, sticky="w")
-            self.eol_entry = ttk.Entry(self.eol_frame)
-            wdgt = self.eol_entry
-            wdgt.bind('<FocusOut>', self.notify_eol)
-            wdgt.grid(row=0, column=1, padx=10, pady=5, sticky="ew")
-
-            # Binary Code length input
-            self.code_length_label = ttk.Label(self.eol_frame, text="feste Code-Länge:")
-            self.code_length_label.grid(row=1, column=0, padx=10, pady=5, sticky="w")
-            self.code_length_entry = ttk.Entry(self.eol_frame)
-            wdgt = self.code_length_entry
-            wdgt.bind('<FocusOut>', self.notify_code_length)
-            wdgt.grid(row=1, column=1, padx=10, pady=5, sticky="ew")
-        placefr_eol(self)
-
-        # Code dictionary input area
-        self.dict_frame = ttk.Frame(self.tools_frame)  # Create frame for code dictionary
-        self.dict_frame.grid(row=1, column=0, sticky="news")  # Place frame in grid
-        
-        def placefr_dict(gui):
-
-            # Code dictionary area
-            gui.code_label = ttk.Label(gui.dict_frame, text="Code-Dictionary (z.B. 'a=011, b=001'):")  # Create label for code dictionary
-            gui.code_label.grid(row=0, column=0, sticky="nw")  # Place label in grid
-            gui.code_field = tk.Text(gui.dict_frame, height=6)  # Create text widget for code dictionary
-            wdgt = gui.code_field
-            # Update the dict if any button is pressed
-            for event in ("<FocusOut>","<Return>", "<space>", ","):
-                wdgt.bind(event, gui.notify_dict)
-            wdgt.grid(row=1, column=0, sticky="news")  # Place text widget in grid
-        placefr_dict(self)
-
-        # Address area
-        self.address_frame = ttk.Frame(self.tools_frame, width=800, height=100)  # Create frame for addresses
-        self.address_frame.grid(row=2, column=0, sticky="new", pady=10)  # Place frame in grid
-
-        def placefr_address(gui):
-            gui.filter_label = ttk.Label(gui.address_frame, text="Filter "+gui.label_binary+":")  # Create label for filters
-            gui.filter_label.grid(row=0, column=0, sticky="w")  # Place label in grid
-
-            # Filters area
-            gui.filter_labels = {}
-            gui.filter_fields = {}
-
-            gui.filter_starts_with_label = ttk.Label(gui.address_frame, text="Nachricht beginnt mit:")
-            wdgt = gui.filter_starts_with_label
-            wdgt.grid(row=1, column=0, sticky="w")
-            gui.filter_labels["starts"]=wdgt
-
-            wdgt = ttk.Entry(gui.address_frame)
-            wdgt.bind('<FocusOut>', gui.notify_filter)
-            wdgt.grid(row=2, column=0, sticky="ew")
-            gui.filter_fields["starts"]=wdgt
-
-            wdgt = ttk.Label(gui.address_frame, text="Nachricht endet mit:")
-            wdgt.grid(row=3, column=0, sticky="w")
-            gui.filter_labels["ends"]=wdgt
-
-            wdgt = ttk.Entry(gui.address_frame)
-            wdgt.bind('<FocusOut>', gui.notify_filter)
-            wdgt.grid(row=4, column=0, sticky="ew")
-            gui.filter_fields["ends"]=wdgt
-
-            # Signature area
-            gui.signature_labels = ttk.Label(gui.address_frame, text="Signaturen: (nur Wörter?)")
-            gui.signature_labels.grid(row=0, column=1, sticky="w")
-
-            gui.signature_labels = {}
-            gui.signature_fields = {}
-
-            wdgt = ttk.Label(gui.address_frame, text="Anfangssignatur:")
-            wdgt.grid(row=1, column=1, sticky="w")
-            gui.signature_labels["start"]=wdgt
-
-            wdgt = gui.signature_fields_start_entry = ttk.Entry(gui.address_frame)  # Create entry widget for start signature
-            wdgt.bind('<FocusOut>', gui.notify_signature)
-            wdgt.grid(row=2, column=1, sticky="ew")
-            gui.signature_fields["start"]=wdgt
-            wdgt = ttk.Label(gui.address_frame, text="Endsignatur:")
-            wdgt.grid(row=3, column=1, sticky="w")
-            gui.signature_labels["end"]=wdgt
-            wdgt = gui.signature_fields_end_entry = ttk.Entry(gui.address_frame)  # Create entry widget for end signature
-            wdgt.bind('<FocusOut>', gui.notify_signature)
-            wdgt.grid(row=4, column=1, sticky="ew")
-            gui.signature_fields["end"]=wdgt
-        placefr_address(self)
-
+        # Tools (eof, code dict, signatures, ...)
+        self.tools_frame = ToolFrame(self._main_frame, self.flow, self.show_message, self.show_warning)
+        self.tools_frame.grid(row=3, rowspan=3, column=1, sticky="news", padx=5, pady=5)
 
 
         ##### COLUMN 2 #####
 
         # User information
-        self.user_info_frame = ttk.Frame(self._main_frame)  # Create frame for user information
-        self.user_info_frame.grid(row=0, column=2, sticky="news", padx=5, pady=5)  # Place frame in grid
-
-        def placefr_user_infos(self):
-            # User label
-            self.username_label = ttk.Label(self.user_info_frame, text="Benutzer: ")
-            self.username_label.grid(row=0, column=0, sticky="w", padx=10, pady=5)
-            
-            # Level label
-            self.lvl_label = ttk.Label(self.user_info_frame, text="Level: 0")
-            self.lvl_label.grid(row=0, column=1, sticky="news")
-        placefr_user_infos(self)
+        self.user_frame = UserFrame(self._main_frame)  # Create frame for user information
+        self.user_frame.grid(row=0, column=2, sticky="news", padx=5, pady=5)
 
         # Diplays
-        self.display_frame = ttk.Frame(self._main_frame)  # Create frame for displays
+        self.display_frame = DisplayFrame(self._main_frame, self.flow)  # Create frame for displays
         self.display_frame.grid(row=1, column=2, rowspan=4, sticky="news", padx=5, pady=5)
         
-        def placefr_display(self):
-            # Notebook for tabs
-            self.notebook = ttk.Notebook(self.display_frame)  # Create notebook
-            self.notebook.grid(row=0, column=0, sticky="nsew")  # Place notebook in grid
-
-            # Tab 1: Monitor
-            self.tab_monitor = ttk.Frame(self.notebook)  # Create tab for monitor
-            self.notebook.add(self.tab_monitor, text="Monitor")  # Add tab to notebook
-            self.monitor_display = scrolledtext.ScrolledText(self.tab_monitor, wrap=tk.WORD, state="disabled", height=20, width=40)  # Create scrolled text widget for file display
-            self.monitor_display.grid(row=0, column=0, sticky="nsew")  # Place file display widget in grid
-
-            # Define a tag for bold formatting
-            self.monitor_display.tag_configure("bold", font=("TkDefaultFont", 10, "bold"))
-
-            # Tab 2: Binary content
-            self.tab_binaryfile = ttk.Frame(self.notebook)  # Create tab for binary content
-            self.notebook.add(self.tab_binaryfile, text="Binärinhalt")  # Add tab to notebook
-            self.binaryfile_display = scrolledtext.ScrolledText(self.tab_binaryfile, wrap=tk.WORD, state="disabled", height=20, width=40)  # Create scrolled text widget for binary display
-            self.binaryfile_display.grid(row=0, column=0, sticky="nsew")  # Place binary display widget in grid
-
-            # Tab 3: History
-            self.tab_history = ttk.Frame(self.notebook)  # Create tab for history
-            self.notebook.add(self.tab_history, text="Historie")  # Add tab to notebook
-            self.history_display = scrolledtext.ScrolledText(self.tab_history, wrap=tk.WORD, state="disabled", height=20, width=40)  # Create scrolled text widget for history display
-            self.history_display.grid(row=0, column=0, sticky="nsew")  # Place history display widget in grid
-        placefr_display(self)
-
         # Submitting
-        self.submit_frame_buttons = ttk.Frame(self._main_frame)  # Create frame for submitting
-        #(bd=2, bg="lightblue")
-        self.submit_frame_buttons.grid(row=5, column=2, sticky="news", padx=5, pady=5)
-        self.submit_frame_field = ttk.Frame(self._main_frame)  # Create frame for submitting
-        self.submit_frame_field.grid(row=5, column=2, sticky="news", padx=5, pady=5)
-
-        def placefr_submit(self):
-            ### Button Frame mit Buttons für 0 und 1
-            self.btn_zero = ttk.Button(self.submit_frame_buttons, text="0", command=lambda: self.flow.network_send("0"))  # Create button to insert "0" into the file
-            self.btn_zero.grid(row=0, column=0, sticky="news", pady=5)
-            self.btn_one = ttk.Button(self.submit_frame_buttons, text="1", command= lambda: self.flow.network_send("1")) # Create button to insert "1" into the file
-            self.btn_one.grid(row=0, column=1, sticky="news", pady=5)
-
-
-            ### Field Frame mit Textfeld für Eingabe und Absenden-Button
-            # Submit button to send text to file (Enter key also sends text)
-            self.btn_send = ttk.Button(self.submit_frame_field, text="Absenden", command=self.submit_text)  # Create button to send text
-            self.btn_send.grid(row=0, column=0, sticky="ew", pady=5)
-
-            # Input label for new text
-            self.input_label = ttk.Label(self.submit_frame_field, text="Text eingeben "+self.label_binary+":")
-            self.input_label.grid(row=1, column=0, sticky="w")
-            # Input field for new text
-            wdgt = self.input_field = tk.Text(self.submit_frame_field, height=5, width=30)
-            wdgt.bind("<Return>", self.on_enter)
-            wdgt.grid(row=2, column=0, sticky="ew")
-        placefr_submit(self)
-
+        self.submit_frame = SubmitFrame(self._main_frame, self.flow, self.show_warning)  # Create frame for submitting
+        self.submit_frame.grid(row=5, column=2, sticky="news", padx=5, pady=5)
 
 
         ##### COLUMN 0 #####
 
         # Buttons
-        self.buttons_frame = ttk.Frame(self._main_frame)  # Create frame for buttons
-        self.buttons_frame.grid(row=0, column=0, rowspan=6, sticky="news", padx=5, pady=5)  # Place frame in grid
-        self.switch_mode_buttons = []
-        self.xp_buttons = []
-        self.toggle_submit_buttons = []
-
-        def _placefr_buttons(self, master):
-            # Button to enforce a reload of the file content
-            self.btn_network_reload = ttk.Button(master, text="Reload", command=self.flow.network_reload)  # Create button to apply filter
-            self.btn_network_reload.grid(row=0, column=0, sticky="", pady=5)  # Place button in grid
-            
-            # Toggle button to switch between buttons and textfield
-            button = ttk.Button(master, text="", command=self.toggle_submit)
-            button.grid(row=1, column=0, sticky="", pady=5)
-            self.toggle_submit_buttons.append(button)
-            
-            # Toggle button to switch between binary and words
-            button = ttk.Button(master, text="", command=self.try_switch_mode)
-            button.grid(row=2, column=0, sticky="", pady=5)
-            self.switch_mode_buttons.append(button)
-
-            # Toggle overlay button
-            button = ttk.Button(master, text="Open XP", command=self.toggle_overlay)
-            button.grid(row=3, column=0, sticky="", pady=5)
-            self.xp_buttons.append(button)
-        _placefr_buttons(self, self.buttons_frame)
+        self.buttons_mainframe = ButtonsFrame(self._main_frame, self.flow, self.transform)  # Create frame for buttons
+        self.buttons_mainframe.grid(row=0, column=0, rowspan=6, sticky="news", padx=5, pady=5)  # Place frame in grid
 
 
 
         ##### OVERLAY PANEL #####
 
         # Overlay frame for achievements and XP bar
-        self.overlay_frame = ttk.Frame(self.__root)
+        self.overlay_frame = OverlayFrame(self.__root, self.flow, self.transform)
         self.overlay_frame.place(relx=0, rely=0, relwidth=0.4, relheight=1)
         self.overlay_frame.lower()  # Initially hide the overlay
-
-        # XP and Achievements
-        self.xp_frame = ttk.Frame(self.overlay_frame)
-        self.xp_frame.grid(row=0, column=0, padx=10, pady=10)
-
-        def placefr_xp(self, master):
-            # XP bar
-            self.xp_bar = ttk.Progressbar(master, orient="horizontal", length=200, mode="determinate")
-            self.xp_bar.grid(row=0, column=0, padx=10, pady=10)
-            self.XP_label = ttk.Label(master, text="XP: "+str(self.xp_bar['value'])+"/max")
-            self.XP_label.grid(row=1, column=0, sticky="w")
-        
-            # Unlocked achievements list
-            self.unlocked_achievements_label = ttk.Label(master, text="Unlocked Achievements:")
-            self.unlocked_achievements_label.grid(row=2, column=0, padx=10, pady=5, sticky="w")
-            self.unlocked_achievements_list = tk.Listbox(master)
-            self.unlocked_achievements_list.grid(row=3, column=0, padx=10, pady=5, sticky="ew")
-
-            # Locked achievements list (Treeview)
-            self.locked_achievements_label = ttk.Label(master, text="Locked Achievements:")
-            self.locked_achievements_label.grid(row=4, column=0, padx=10, pady=5, sticky="w")
-            self.locked_achievements_tree = ttk.Treeview(master, columns=("Description", "XP"), show="headings")
-            self.locked_achievements_tree.heading("Description", text="Description")
-            self.locked_achievements_tree.heading("XP", text="XP")
-            self.locked_achievements_tree.column("Description", width=200)
-            self.locked_achievements_tree.column("XP", width=50)
-            self.locked_achievements_tree.grid(row=5, column=0, padx=10, pady=5, sticky="ew")
-        placefr_xp(self, self.xp_frame)
-
-        # Buttons
-        self.buttonsoverlay_frame = ttk.Frame(self.overlay_frame)  # Create frame for buttons
-        self.buttonsoverlay_frame.grid(row=0, column=1, rowspan=4, sticky="nsew", padx=5, pady=5)  # Place frame in grid
-
-        _placefr_buttons(self, self.buttonsoverlay_frame)
+    
 
     def __configure_grid(self):
         """
@@ -428,7 +162,7 @@ class ProtoGUI:
         self._main_frame.grid_rowconfigure(0)  # Zeile 0 startet mit 100 Pixeln Höhe
         self._main_frame.grid_rowconfigure(5, minsize=150)  # Zeile 1 startet mit 200 Pixeln Höhe
         self.overlay_frame.grid_columnconfigure(0, minsize=280)
-        self.progress_frame.grid_rowconfigure(2, minsize=150)
+        self.progress_frame.grid_rowconfigure(0, minsize=150)
         
 
 
@@ -448,60 +182,6 @@ class ProtoGUI:
         self._main_frame.grid_columnconfigure(0, weight=0)
         self._main_frame.grid_columnconfigure(1, weight=3)
         self._main_frame.grid_columnconfigure(2, weight=0)
-        # button frame = mainframe column 0
-        self.buttons_frame.grid_rowconfigure(0, weight=1)
-        self.buttons_frame.grid_rowconfigure(1, weight=1)
-        self.buttons_frame.grid_rowconfigure(2, weight=1)
-        self.buttons_frame.grid_rowconfigure(3, weight=1)
-        self.buttons_frame.grid_columnconfigure(0, weight=1)
-        # progress frame = mainframe column 1, row 0-1
-        self.progress_frame.grid_rowconfigure(0, weight=1)
-        self.progress_frame.grid_rowconfigure(1, weight=1)
-        self.progress_frame.grid_rowconfigure(2, weight=1)
-        self.progress_frame.grid_rowconfigure(3, weight=1)
-        self.progress_frame.grid_columnconfigure(0, weight=1)
-        self.progress_frame.grid_columnconfigure(1, weight=0)
-        # tool frame = mainframe column 1, row 3-5
-        self.tools_frame.grid_rowconfigure(0, weight=1)
-        self.tools_frame.grid_rowconfigure(1, weight=1)
-        self.tools_frame.grid_rowconfigure(2, weight=1)
-        self.tools_frame.grid_columnconfigure(0, weight=1)
-        # eol frame = tool row 0
-        self.eol_frame.grid_rowconfigure(0, weight=1)
-        self.eol_frame.grid_rowconfigure(1, weight=1)
-        self.eol_frame.grid_columnconfigure(0, weight=1)
-        self.eol_frame.grid_columnconfigure(1, weight=0)
-        # dict frame = tool row 1
-        self.dict_frame.grid_rowconfigure(0, weight=1)
-        self.dict_frame.grid_rowconfigure(1, weight=1)
-        self.dict_frame.grid_columnconfigure(0, weight=1)
-        # address frame = tool row 2
-        self.address_frame.grid_rowconfigure(0, weight=1)
-        self.address_frame.grid_rowconfigure(1, weight=1)
-        self.address_frame.grid_rowconfigure(2, weight=1)
-        self.address_frame.grid_rowconfigure(3, weight=1)
-        self.address_frame.grid_rowconfigure(4, weight=1)
-        self.address_frame.grid_columnconfigure(0, weight=1)
-        self.address_frame.grid_columnconfigure(1, weight=0)
-        # user infos = mainframe column 2, row 0
-        self.user_info_frame.grid_rowconfigure(0, weight=1)
-        self.user_info_frame.grid_columnconfigure(0, weight=1)
-        # display frame = mainframe column 2, row 1
-        self.display_frame.grid_rowconfigure(0, weight=1)
-        self.display_frame.grid_columnconfigure(0, weight=1)
-        # submit button frame = mainframe column 2, row 2
-        self.submit_frame_buttons.grid_rowconfigure(0, weight=1)
-        self.submit_frame_buttons.grid_columnconfigure(0, weight=1)
-        self.submit_frame_buttons.grid_columnconfigure(1, weight=1)
-        # submit field frame = mainframe column 2, row 2
-        self.submit_frame_field.grid_rowconfigure(0, weight=1)
-        self.submit_frame_field.grid_rowconfigure(1, weight=1)
-        self.submit_frame_field.grid_rowconfigure(2, weight=1)
-        self.submit_frame_field.grid_columnconfigure(0, weight=1)
-        # overlay frame
-        self.overlay_frame.grid_rowconfigure(0, weight=1)
-        self.overlay_frame.grid_columnconfigure(0, weight=1)
-
 
 
 
@@ -558,268 +238,39 @@ class ProtoGUI:
         """
         Update the GUI elements based on the provided data.
         """
-        if "username" in data:
-            username = data["username"]
-            self.username_label.config(text=f"Benutzer: {username}")
-        if "xp" in data:
-            self.xp_value = data["xp"]
-            self.xp_bar['value'] = self.xp_value*100/self.xp_max
-        if "xp_max" in data:
-            self.xp_max = data["xp_max"]
-            self.XP_label.config(text=f"XP: {self.xp_value}/{self.xp_max}")
-        if "achievements" in data:
-            if "locked" in data["achievements"]:
-                locked_achievements = data["achievements"]["locked"]
-                self.initialize_locked_achievements(locked_achievements)
-            if "unlocked" in data["achievements"]:
-                unlocked_achievements = data["achievements"]["unlocked"]
-                self.unlocked_achievements_list.delete(0, tk.END)
-                for ach in unlocked_achievements:
-                    self.unlocked_achievements_list.insert(tk.END, f"{ach.title} - {ach.descr} ({ach.xp} XP)")
-        if "filter" in data:
-            for mode in self.filter_fields:
-                self.filter_fields[mode].delete(0, tk.END)
-                self.filter_fields[mode].insert(0, data["filter"].get(mode,""))
-        if "signature" in data:
-            for mode in self.signature_fields:
-                self.signature_fields[mode].delete(0, tk.END)
-                self.signature_fields[mode].insert(0, data["signature"].get(mode,""))
-        if "code_length" in data:
-            self.code_length_entry.delete(0, tk.END)
-            cl = data["code_length"]
-            if cl:
-                self.code_length_entry.insert(0, cl)
-        if "eol" in data:
-            self.eol_entry.delete(0, tk.END)
-            self.eol_entry.insert(0, data["eol"])
-        if "code_text" in data:
-            self.code_field.delete("1.0", tk.END)
-            self.code_field.insert(tk.END, data["code_text"])
-        if "level" in data:
-            self.lvl_label.config(text=f"Level: {data['level']['id']}")
-            self.lvl_title.config(text=data['level']['title'])
-        if "challenge" in data:
-            self.challenge_title.config(text=data["challenge"]['title'])
-            self.challenge_description.config(text=data["challenge"]['descr'])
-        if "chlg_bar" in data:
-            self.progress_bar.config(value=data["chlg_bar"])
-
-    def notify_eol(self, event):
-        """
-        Notify the flow about the updated end-of-line (EOL) character.
-        """
-        try:
-            self.flow.gui_change(data={"eol":self.eol_entry.get()})
-            self.show_message(text="Zeilenende aktualisiert", warn=False)
-        except Warning as w:
-            self.show_warning(w.args)
-
-    def notify_code_length(self, event):
-        """
-        Notify the flow about the updated code length.
-        """
-        try:
-            newlength = self.code_length_entry.get()
-            try:
-                code_length = int(newlength) if newlength else None
-            except ValueError:
-                raise Warning("Code-Länge","Bitte eine gültige Zahl eingeben.")
-            self.flow.gui_change(data={"code_length":code_length})
-            self.show_message(text="Code-Länge aktualisiert", warn=False)
-        except Warning as w:
-            self.show_warning(w.args)
-
-    @staticmethod
-    def get_clean_text(tktext):
-        """
-        Get the clean text from a Tkinter Text widget.
-        """
-        return tktext.get("1.0", "end-1c")
-
-    def notify_dict(self, event):
-        """
-        Notify the flow about the updated dictionary.
-        """
-        try:
-            self.flow.gui_change(data={"code_text":ProtoGUI.get_clean_text(self.code_field)})
-            self.show_message(text="Wörterbuch aktualisiert", warn=False)
-        except Warning as w:
-            self.show_warning(w.args)
-
-    def notify_filter(self, event):
-        """
-        Notify the flow about the updated filter settings.
-        """
-        filter = {}
-        for mode in self.filter_fields:
-            filter[mode] = self.filter_fields[mode].get()
-        try:
-            self.flow.gui_change(data = {"filter":filter})
-            self.show_message(text="Filter aktualisiert", warn=False)
-        except Warning as w:
-            self.show_warning(w.args)
-
-    def notify_signature(self, event):
-        """
-        Notify the flow about the updated signature settings.
-        """
-        signature = {}
-        for mode in self.signature_fields:
-            signature[mode] = self.signature_fields[mode].get()
-        try:
-            self.flow.gui_change(data = {"signature":signature})
-            self.show_message(text="Signaturen aktualisiert", warn=False)
-        except Warning as w:
-            self.show_warning(w.args)
-    
+        if any(x in data for x in ("xp","xp_max","achievements")):
+            self.overlay_frame.update_on(data)
+        if any(x in data for x in ("username","level")):
+            self.user_frame.update_on(data)
+        if any(x in data for x in ("eol","code_length","code_text","filter","signature")):
+            self.tools_frame.update_on(data)
+        if any(x in data for x in ("level","challenge","chlg_bar")):
+            self.progress_frame.update_on(data)
 
 
 
+    # FORWARD to FRAME subclasses
 
-    # Fill in the blank test
-    def show_fill_blanks(self, testdata):
+    def start_fill_blanks(self, testdata):
         """
-        Show the fill-in-the-blank area and hide the description and progress bar.
+        Show the fill-in-the-blank test interface.
 
         Parameters:
-            testdata (dict): A dictionary containing the data (text_parts and options) for the fill-in-the-blank test.
+            testdata (dict): The data for the fill-in-the-blank test.
+
+        Called:
+            flow.py check_progress(): when all challenges are completed
         """
-        self.challenge_description.grid_remove()  # Hide the description label
-        self.progress_bar.grid_remove()  # Hide the progress bar
-        self.fill_blank_frame.grid()
-        self.btn_submit_fill_blank.grid()  # Show the submit button
-
-        # empty the fill-in-the-blank area
-        for widget in self.fill_blank_frame.winfo_children():
-            widget.destroy()
-        
-        self.comboboxes = self.create_fill_in_the_blank(self.fill_blank_frame, testdata["text_parts"], testdata["options"], frame_width=self.col1size)
-
-    @staticmethod
-    def create_fill_in_the_blank(text_frame, text_parts, options, frame_width):
-        """
-        Create the fill-in-the-blank text with comboboxes.
-
-        Parameters:
-            text_parts (list): List of text sections (before and after the blanks).
-            options (list): List of options for each blank.
-            frame_width (int): Maximum width of the frame in pixels.
-
-            Returns:
-                list: A list of comboboxes for the fill-in-the-blank areas.
-        """
-        comboboxes = []
-
-        # Schriftart des Labels
-        label_font = font.nametofont("TkDefaultFont")
-
-        current_row = 0
-        current_column = 0
-        remaining_width = frame_width  # Verfügbare Breite in der aktuellen Zeile
-
-        def place_text_in_lines(text, font, max_width, starting_width):
-            """
-            Places the text in lines that fit within the frame. The first line is already started, so it is not fully available.
-
-            Parameters:
-                text (str): The text to be placed.
-                font (Font): The font of the text.
-                max_width (int): Maximum width in pixels.
-                starting_width (int): Available width in the current line.
-
-            Returns:
-                list: A list of lines with the placed text.
-            """
-            lines = []
-            avaliable_width = starting_width
-            current_line = ""
-            for word in text.split():
-                if font.measure(current_line + " " + word) <= avaliable_width:
-                    current_line += " " + word
-                else:
-                    lines.append(current_line)
-                    current_line = word
-                    avaliable_width = max_width
-            lines.append(current_line)
-            return lines
-
-        # Frame für die erste Zeile
-        current_line_frame = ttk.Frame(text_frame)
-        current_line_frame.grid(row=current_row, column=0, sticky="w", padx=0, pady=0)
-
-        for i, part in enumerate(text_parts):
-            lines = place_text_in_lines(part, label_font, remaining_width, remaining_width)
-            for n, line_text in enumerate(lines):
-                label = ttk.Label(current_line_frame, text=line_text)
-                label.grid(row=0, column=current_column, padx=0, pady=0)
-                current_column += 1
-
-                #last line needs no line break
-                if n == len(lines) - 1:
-                    remaining_width -= label_font.measure(line_text)  # Verbleibende Breite aktualisieren
-                    break
-                
-                # Zeilenumbruch
-                current_row += 1
-                current_column = 0
-                remaining_width = frame_width
-
-                # Neues Frame für die nächste Zeile
-                current_line_frame = ttk.Frame(text_frame)
-                current_line_frame.grid(row=current_row, column=0, sticky="w", padx=0, pady=0)
-
-
-            # Combobox für die Lücke (falls Optionen vorhanden sind)
-            if i < len(options):
-                combobox_width = max(len(op) for op in options[i])  # Breite der Combobox berechnen
-
-                if combobox_width > remaining_width:
-                    # Zeilenumbruch, wenn die Combobox nicht mehr passt
-                    current_row += 1
-                    current_column = 0
-                    remaining_width = frame_width
-
-                    # Neues Frame für die nächste Zeile
-                    current_line_frame = ttk.Frame(text_frame)
-                    current_line_frame.grid(row=current_row, column=0, sticky="w", padx=0, pady=0)
-
-                # Combobox erstellen
-                combobox = ttk.Combobox(current_line_frame, values=options[i], state="readonly", width=combobox_width)
-                combobox['font'] = label_font
-                combobox.grid(row=0, column=current_column, padx=0, pady=0)
-                comboboxes.append(combobox)
-                
-                current_column += 1
-                remaining_width -= combobox_width
-    
-        # Passe das Gridlayout an
-        text_frame.grid_columnconfigure(0, weight=1)
-        for i in range(current_row + 1):
-            text_frame.grid_rowconfigure(i, weight=1)
-
-        return comboboxes
-
-    def submit_answers(self):
-        """
-        Collects the answers from the comboboxes and submits them to the flow.
-        """
-        answers = [combobox.get() for combobox in self.comboboxes]
-        self.flow.submit_answers(answers)
+        self.progress_frame.start_fill_blanks(testdata, self.col1size)
 
     def end_fill_blanks(self):
         """
-        Closes the fill-in-the-blank area and shows the description and progress bar again.
-        """
-        self.fill_blank_frame.grid_remove()
-        for combobox in self.comboboxes:
-            combobox.destroy()
-        self.comboboxes = []
-        self.fill_blank_frame.grid_remove()
+        Hides the fill-in-the-blank test interface.
 
-        self.challenge_description.grid()
-        self.progress_bar.grid()
-    
-    # TEXT FIELDS
+        Called:
+            flow.py submit_answers(): when the user has submits their answers
+        """
+        self.progress_frame.end_fill_blanks()
 
     def display(self, content={}):
         """
@@ -829,27 +280,16 @@ class ProtoGUI:
             content (dict): The content to be displayed, with keys for each text field.
         """
 
-        def insert(display, content, replace=True):
-            display.config(state="normal")
-            if replace:
-                display.delete("1.0", tk.END)
-            display.insert(tk.END, content)
-            display.config(state="disabled")
-            display.yview(tk.END)  # Scroll to the end of the text field
-
-        if "binary" in content:
-            insert(self.binaryfile_display, content=content["binary"], replace=True)
-        if "display" in content:
-            insert(self.monitor_display, content=content["display"], replace=True)
-        if "history" in content:
-            insert(self.history_display, content=content["history"], replace=False)
-
+        self.display_frame.display(content)
+    
     def clear_input(self):
-        self.input_field.delete("1.0", tk.END)
+        """
+        Clears the input field.
 
-
-
-
+        Called:
+            flow.py check_and_submit(): when the input has been submitted to the network
+        """
+        self.submit_frame.clear_input()
 
 
 
@@ -884,36 +324,28 @@ class ProtoGUI:
 
 
 
+    
 
-    # Event handlers
 
-    def on_enter(self, event):
+
+
+
+    # Transforming the GUI
+
+    def transform(self, mode, init=False):
         """
-        Handles the Enter key event in the input field.
-        If Shift is pressed, a normal line break is allowed.
+        Transforms the GUI elements based on the selected mode.
 
         Parameters:
-            event (tk.Event): The event object containing information about the key press.
+            mode (str): The mode to switch to ("submit", "mode", or "overlay").
+            init (bool): Whether to initialize the mode (True) or toggle it (False).
         """
-        if event.state & 0x1:  # Check if Shift is pressed
-            return  # Keep normal line break function
-        self.submit_text()
-        return "break"  # Prevent a new line from being created
-    
-    def submit_text(self):
-        """
-        Submits the text from the input field to the flow.
-        """
-        try:
-            self.flow.check_and_submit(ProtoGUI.get_clean_text(self.input_field))  # Send message
-        except Warning as w:
-            self.show_warning(w.args)
-
-
-
-
-
-    # Togglers
+        if mode == "submit":
+            self.toggle_submit(init)
+        elif mode == "mode":
+            self.try_switch_mode()
+        elif mode == "overlay":
+            self.toggle_overlay()
 
     def toggle_submit(self, init=False):
         """
@@ -926,16 +358,11 @@ class ProtoGUI:
             self.mode_textfield = False # At the initialisation set to textfield
         else:
             self.mode_textfield = not self.mode_textfield # Toggle the mode
-        if self.mode_textfield:
-            self.submit_frame_buttons.grid_remove()
-            self.submit_frame_field.grid()
-            for button in self.toggle_submit_buttons:
-                button.config(text="-> Knöpfe")
-        else:
-            self.submit_frame_field.grid_remove()
-            self.submit_frame_buttons.grid()
-            for button in self.toggle_submit_buttons:
-                button.config(text="-> Feld")
+        
+        self.submit_frame.input_mode(self.mode_textfield)
+
+        from . import ButtonsFrame
+        ButtonsFrame.label_submit(self.mode_textfield)
 
     def try_switch_mode(self):
         """
@@ -946,68 +373,46 @@ class ProtoGUI:
         except Warning as w:
             self.show_warning(w.args)
 
-    def adjust_tomode(self, binary):
+    def adjust_to_input_mode(self, binary):
         """
         Adjusts the UI elements to match the current mode.
 
         Parameters:
             binary (bool): Whether the mode is binary (True) or text (False).
         """
-        if binary:
-            #self.filter_entry_words.grid_remove()
-            self.filter_label.config(text="Filter "+self.label_binary+":")
-            #self.filter_entry_binary.grid()
-            self.input_label.config(text="Text eingeben "+self.label_binary+":")
-            for button in self.switch_mode_buttons:
-                button.config(text="-> Wörter")
-        else:
-            #self.filter_entry_binary.grid_remove()
-            self.filter_label.config(text="Filter "+self.label_words+":")
-            #self.filter_entry_words.grid()
-            self.input_label.config(text="Text eingeben "+self.label_words+":")
-            for button in self.switch_mode_buttons:
-                button.config(text="-> Binär")
+        label = self.label_binary if binary else self.label_words
+        self.tools_frame.relabel(label)
+        self.submit_frame.relabel(label)
+        from . import ButtonsFrame
+        ButtonsFrame.label_input(binary)
     
     def toggle_overlay(self):
         """
-        Toggles the visibility of the log frame.
+        Toggles the visibility of the journal frame.
         """
         self.overlay_visible = not self.overlay_visible
         if self.overlay_visible:
             self.overlay_frame.lift()
-            for button in self.xp_buttons:
-                button.config(text="Schließe XP")
         else:
             self.overlay_frame.lower()
-            for button in self.xp_buttons:
-                button.config(text="Zeige XP")
 
     def toggle_addressing(self):
         """
         Toggles the visibility of the addressing frame.
         """
-        if self.address_frame.winfo_ismapped(): # Check if the addressing frame is visible
-            self.address_frame.grid_remove() # Hide the addressing frame
-        else: # If the addressing frame is hidden
-            self.address_frame.grid() # Show the addressing frame
+        self.tools_frame.toggle_frame("address")
 
-    def toggle_eol(self):
+    def toggle_pckg(self):
         """
-        Toggles the visibility of the end-of-line frame.
+        Toggles the visibility of the packaging frame.
         """
-        if self.eol_frame.winfo_ismapped(): # Check if the end-of-line frame is visible
-            self.eol_frame.grid_remove() # Hide the end-of-line frame
-        else: # If the end-of-line frame is hidden
-            self.eol_frame.grid() # Show the end-of-line frame
+        self.tools_frame.toggle_frame("pckg")
 
     def toggle_code_dict(self):
         """
         Toggles the visibility of the code dictionary frame.
         """
-        if self.dict_frame.winfo_ismapped(): # Check if the code dictionary frame is visible
-            self.dict_frame.grid_remove() # Hide the code dictionary frame
-        else: # If the code dictionary frame is hidden
-            self.dict_frame.grid() # Show the code dictionary frame
+        self.tools_frame.toggle_frame("dict")
 
 _gui = None
 def get_gui():
