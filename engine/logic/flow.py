@@ -7,7 +7,8 @@ class ProtoFlow:
         Initialize the ProtoFlow class.
         """
         # Initialize variables
-        self.mode_binary = True  # Initialize the mode to binary
+        self.encoding = False  # Initialize the encoding mode to off
+        self.decoding = False  # Initialize the decoding mode to off
         self.overlay_visible = False  # Initialize the overlay visibility
 
         # Initialize the everythings
@@ -42,8 +43,8 @@ class ProtoFlow:
         _gui.choose_username()
         self.update_gui(on_keys=["guiprogress"])
         
-        _gui.toggle_submit(init=True) # Initialize the input mode to buttons (including removal of the input field, labels and buttons)
-        self.switch_mode(init=True) # Initialize the input field to binary (including removal of the words fields)
+        for mode in ("bt/text","decode","encode"):
+            _gui.transform(mode, init=True)  # Initialize the input mode to buttons (including removal of the input field, labels and buttons)
 
         ### LAST COMMAND TO RUN
         _gui.start()
@@ -78,19 +79,23 @@ class ProtoFlow:
         _bicoder = bicoder()
         textlines = _bicoder.split_eol(content)
 
-        # Decode the text lines if the mode is not binary
-        if self.mode_binary:
-            # If the mode is binary, simply filter the lines
-            textlines = filter().filter_lines(textlines)
-        else:
-            # If the mode is not binary, decode the lines and filter them
+        # Decode the text lines if decoding is enabled
+        if self.decoding:
+            # If decoding is enabled, decode the lines and filter them
             decoded_lines = []
             for line in textlines:
+                if not self.encoding and not filter().check_text(line):
+                    continue
                 # Decode each line of text
                 text = _bicoder.decode_text(line)
-                if filter().check_text(text):
-                    decoded_lines.append(text)
+                if self.encoding and not filter().check_text(text):
+                    continue
+                decoded_lines.append(text)
             textlines = decoded_lines
+        else:
+            # If decoding is not enabled, simply filter the lines
+            textlines = filter().filter_lines(textlines)
+        
         # Join the filtered lines into a single text
         displaytext = "\n>".join(textlines)
 
@@ -118,7 +123,7 @@ class ProtoFlow:
         stats().send_content(binary_text)  # inform the stats manager about the new message
 
         # Append the binary text to the file
-        filemanager().append_network(binary_text)
+        filemanager().append_network(binary_text, bicoder().code_length)
 
         # Update history
         gui().display({"history":binary_text})
@@ -155,7 +160,7 @@ class ProtoFlow:
             return
         
         # Check if only allowed characters are entered
-        if self.mode_binary:
+        if not self.encoding:
             if not all(c in {"0", "1"} for c in text):
                 _gui.show_message("Nur 0 und 1 erlaubt!")
                 return
@@ -166,7 +171,7 @@ class ProtoFlow:
         _bicoder = bicoder()
         text = signature().sign(text)
         # Encode the text line by line
-        if not self.mode_binary:
+        if self.encoding:
             text = _bicoder.encode_text(text)
         text = _bicoder.append_eol(text)
 
@@ -195,8 +200,6 @@ class ProtoFlow:
         _gui.update(data={"chlg_bar":chlgprogress})
         for ach in self.achievements.values():
             if ach.condition() and (ach not in self.unlocked_achievements):
-                print(f"Achievement unlocked: {ach.title}")
-                print("flow line 198")
                 self.unlocked_achievements.append(ach)
                 self.locked_achievements.remove(ach)
                 _gui.unlock_achievement(ach)
@@ -279,32 +282,50 @@ class ProtoFlow:
             gui().show_message(text="Konfiguration geladen!", warn=False) # Show a success message
 
     # Togglers
-    def switch_mode(self, init=False):
+    def toggle_decode(self, init=False):
         """
-        Switches the mode between binary and text.
+        Tries to switch the automatic decoding off or on.
 
         Parameters:
-            init (bool): If True, initializes the mode to binary. If False (default), toggles the mode.
+            init (bool): If True, initializes the mode to active. If False (default), toggles the mode.
+
+        Returns:
+            bool: Whether the decoding is active.
+        """
+        if init:
+            self.decoding = False # Initialize the display field to binary outputs = no automatic decoding
+        else:
+            self.decoding = not self.decoding
+            self.network_reload() #reload display
+        return self.decoding
+
+    def toggle_encode(self, init=False):
+        """
+        Tries to switch the automatic encoding off or on.
+
+        Parameters:
+            init (bool): If True, initializes the mode to active. If False (default), toggles the mode.
+
+        Returns:
+            bool: Whether the encoding is active.
         """
         _gui = gui()
         if init:
-            self.mode_binary = True
-            _gui.adjust_to_input_mode(self.mode_binary)
-            return
+            self.encoding = False # Initialize the input field to binary inputs = no automatic encoding
+            return self.encoding
         
-        oldmode_is_binary = self.mode_binary
         olddata = settings().collect_data(["filter", "signature"])
-        if oldmode_is_binary:
-            newdata = bicoder().decode_data(olddata)
-        else:
+        if self.encoding:
             newdata = bicoder().encode_data(olddata)
-        
-        self.mode_binary = not oldmode_is_binary # Toggle the mode, except at the initialisation: then set to binary
+        else:
+            newdata = bicoder().decode_data(olddata)
+            
+        self.encoding = not self.encoding # Toggle the mode, except at the initialisation: then set to binary
+        if isinstance(newdata, dict):
+            newdata["encoding"] = self.encoding
         settings().parse_data(newdata)
         _gui.update(newdata)
-        _gui.adjust_to_input_mode(self.mode_binary)
-        self.network_reload()
-    
+        return self.encoding
 
     # GUI
     def gui_change(self, data={}):
@@ -314,14 +335,17 @@ class ProtoFlow:
         Parameters:
             data (dict): The data containing the changes to be applied.
         """
+        data["encoding"] = self.encoding
         autosaved = settings().parse_data(data=data)
         self.update_gui(on_keys=list(data))
+
         if autosaved:
             gui().show_message(text="automatisch gespeichert", warn=False)
+        
         if any(x in data for x in ["code_text","network","eol","filter","code_length"]):
-
             self.network_reload()
-        settings().check_integrity(on_keys=list(data), for_binary=self.mode_binary)
+            
+        settings().check_integrity(on_keys=list(data), encoding=self.encoding)
 
     def update_gui(self, on_keys=[]):
         """

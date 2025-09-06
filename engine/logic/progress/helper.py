@@ -4,8 +4,15 @@ class ProtoHelper:
 
     Example:
         hints = [
-            {"condition": lambda: challenge.progress() == 0, "advice": "Schau dich ein wenig um und probier aus, was du anklicken kannst."},
-            {"condition": lambda: challenge.progress() < 100, "advice": "Was hast du angeklickt, so dass sich der Fortschrittsbalken gefüllt hat?"}
+            {
+                "condition": lambda: challenge.progress() == 0,
+                "advice": '''Schau dich ein wenig um und probier aus, was du anklicken kannst.'''
+            },
+            {
+                "condition": lambda: challenge.progress() < 100,
+                "advice": '''Du hast die relevante Schaltfläche schon gefunden!
+                Was hast du angeklickt, so dass sich der Fortschrittsbalken gefüllt hat?'''
+            }
         ]
         helper = ProtoHelper(hints)
         advice = helper.get_advice()

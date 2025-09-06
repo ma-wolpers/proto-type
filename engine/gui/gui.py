@@ -261,7 +261,7 @@ class ProtoGUI:
         Called:
             flow.py check_progress(): when all challenges are completed
         """
-        self.progress_frame.start_fill_blanks(testdata, self.col1size)
+        self.progress_frame.start_fill_blanks(testdata, self.col1size-10)
 
     def end_fill_blanks(self):
         """
@@ -337,17 +337,25 @@ class ProtoGUI:
         Transforms the GUI elements based on the selected mode.
 
         Parameters:
-            mode (str): The mode to switch to ("submit", "mode", or "overlay").
+            mode (str): The mode to switch to:
+                - "bt/text": Switch between button and text field submission.
+                - "decode": Toggle automatic decoding.
+                - "encode": Toggle automatic encoding.
+                - "overlay": Toggle overlay visibility.
             init (bool): Whether to initialize the mode (True) or toggle it (False).
         """
-        if mode == "submit":
+        if mode == "bt/text":
             self.toggle_submit(init)
-        elif mode == "mode":
-            self.try_switch_mode()
+        elif mode == "decode":
+            self.toggle_decode(init)
+        elif mode == "encode":
+            self.toggle_encode(init)
         elif mode == "overlay":
             self.toggle_overlay()
+        else:
+            print(f"Achtung: Unbekannter GUI-Transformationsmodus! '{mode}'")
 
-    def toggle_submit(self, init=False):
+    def toggle_submit(self, init):
         """
         Toggles the submission field mode between binary buttons and text field.
 
@@ -364,27 +372,27 @@ class ProtoGUI:
         from . import ButtonsFrame
         ButtonsFrame.label_submit(self.mode_textfield)
 
-    def try_switch_mode(self):
+    def toggle_decode(self, init):
         """
-        Tries to switch the mode of the flow.
+        Switches the automatic decoding off or on.
+        """
+        decoding = self.flow.toggle_decode(init=init)
+        from . import ButtonsFrame
+        ButtonsFrame.label_display(decoding)
+
+    def toggle_encode(self, init):
+        """
+        Tries to switch the automatic encoding off or on.
         """
         try:
-            self.flow.switch_mode()
+            encoding = self.flow.toggle_encode(init=init)
+            label = self.label_words if encoding else self.label_binary
+            self.tools_frame.swap(encoding, label)
+            self.submit_frame.relabel(label)
+            from . import ButtonsFrame
+            ButtonsFrame.label_input(encoding)
         except Warning as w:
             self.show_warning(w.args)
-
-    def adjust_to_input_mode(self, binary):
-        """
-        Adjusts the UI elements to match the current mode.
-
-        Parameters:
-            binary (bool): Whether the mode is binary (True) or text (False).
-        """
-        label = self.label_binary if binary else self.label_words
-        self.tools_frame.relabel(label)
-        self.submit_frame.relabel(label)
-        from . import ButtonsFrame
-        ButtonsFrame.label_input(binary)
     
     def toggle_overlay(self):
         """

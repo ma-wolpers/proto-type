@@ -18,13 +18,14 @@ class ProtoFilter:
         """
         self.update(filter)
 
-    def update(self, filter):
+    def update(self, filter={}, words=False):
         """Update the filter criteria with a dictionary.
 
         Parameters:
             filter (dict): A dictionary containing the filter criteria:
                 "starts" : binary code (str)
                 "ends" : binary code (str)
+            "words" (bool): If True, the filter values are treated as words, if False as binary codes.
         """
         
         # check if the filter is a valid dictionary
@@ -32,9 +33,10 @@ class ProtoFilter:
             raise Warning("Filter", "Filter muss ein Dictionary sein!")
         if not all(isinstance(v, str) for v in filter.values()):
             raise Warning("Filter", "Filterwerte müssen Strings sein!")
-        # check if the filter items are binary codes
-        if not all(c in "01" for v in filter.values() for c in v):
-            raise Warning("Filter", "Nur 0 und 1 erlaubt!")
+        if not words:
+            # check if the filter items are binary codes
+            if not all(c in "01" for v in filter.values() for c in v):
+                raise Warning("Filter", "Nur 0 und 1 erlaubt!")
         self._starts = filter.get("starts", "")
         self._ends = filter.get("ends", "")
     
@@ -117,7 +119,7 @@ class ProtoSignature:
         self._end = ""
         self.update(signature)
 
-    def update(self, signature={}):
+    def update(self, signature={}, words=False):
         """
         Updates the signature with the given dictionary.
 
@@ -125,11 +127,16 @@ class ProtoSignature:
             signature (dict): A dictionary containing the signature information:
                 "start": The start string (str)
                 "end": The end string (str)
+            "words": (bool) If True, the signature values are treated as words, if False as binary codes.
         """
         if not isinstance(signature, dict):
             print(f"Achtung: {signature} ist kein Dictionary!")
         if not all(isinstance(v, str) for v in signature.values()):
             print(f"Achtung: {signature} sind keine Strings!")
+        if not words:
+            # check if the signature items are binary codes
+            if not all(c in "01" for v in signature.values() for c in v):
+                raise Warning("Signature", "Nur 0 und 1 erlaubt!")
         self._start = signature.get("start", "")
         self._end = signature.get("end", "")
     

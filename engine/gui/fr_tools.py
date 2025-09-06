@@ -49,13 +49,19 @@ class ToolFrame(ttk.Frame):
         if any(x in data for x in ("filter", "signature")):
             self.address_frame.update_on(data)
 
-    def relabel(self, label):
+    def swap(self, coding_first, label):
         """
-        Relabel the input fields.
+        Swap the dictionary and address frame, and relabel the address input fields.
 
         Parameters:
             label (str): The new label for the input fields.
         """
+        if coding_first:
+            self.dict_frame.grid(row=1, column=0, sticky="news")
+            self.address_frame.grid(row=2, column=0, sticky="new", pady=10)
+        else:
+            self.dict_frame.grid(row=2, column=0, sticky="news")
+            self.address_frame.grid(row=1, column=0, sticky="new", pady=10)
         self.address_frame.relabel(label)
 
     ## VISIBILITY
@@ -291,7 +297,7 @@ class AddressFrame(ttk.Frame):
         self.grid_rowconfigure(3, weight=1)
         self.grid_rowconfigure(4, weight=1)
         self.grid_columnconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=0)
+        self.grid_columnconfigure(1, weight=1)
 
 
     def update_on(self, data):

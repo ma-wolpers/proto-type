@@ -11,7 +11,7 @@ class BinaryCoder:
         """
         self.__code_dict = code_dict
         self.__eol = eol
-        self.__code_length = None # This will be set when the code dictionary is updated
+        self.__code_length = 0 # This will be set when the code dictionary is updated
 
     def update_dict(self, code_dict):
         """
@@ -43,10 +43,10 @@ class BinaryCoder:
             code_length (int): The code length to use.
         """
         if not code_length:
-            self.__code_length = None
+            self.__code_length = 0
             return self.__code_length
         # Validate the code length
-        if not isinstance(code_length, int) or code_length < 1:
+        if not isinstance(code_length, int) or code_length < 0:
             raise Warning("Wörterbuch", "Ungültige Code-Länge!")
         self.__code_length = code_length
         self.match_code_length_eol()
@@ -75,7 +75,7 @@ class BinaryCoder:
         """
         Adjust the code dictionary to match the specified code length.
         """
-        if self.__code_length is None:
+        if not self.__code_length:
             return True # No code length set, nothing to match
         # Update the code dictionary to ensure all codes are of the specified length
         code_dict = {}
@@ -100,7 +100,7 @@ class BinaryCoder:
             str|bool: The matched code or False if it cannot be matched.
         """
         code_length = self.__code_length
-        if code_length is None:
+        if not code_length:
             return code # No code length set, nothing to match
         if len(code) < code_length:
                 # Pad the eol with zeros to the left
@@ -361,7 +361,7 @@ class BinaryCoder:
             Warning: If the decoding process fails.
         """
 
-        if not isinstance(self.__code_length, int) or self.__code_length < 1:
+        if not isinstance(self.__code_length, int) or self.__code_length < 0:
             raise Warning("Dekodierprozess", "Ungültige Code-Länge!")
         # reverse the code dictionary for decoding
         revdict = {v: k for k, v in self.__code_dict.items()}
@@ -523,22 +523,22 @@ class BinaryCoder:
         elif type(data) is dict:
             return all(self.all_binary(data[key]) for key in data)
         
-    def check_dict_compliance(self, data, for_binary):
+    def check_dict_compliance(self, data, encoding):
         """
         Check if the given dictionary complies with the binary encoding rules.
 
         Parameters:
             data (dict): The dictionary to check.
-            for_binary (bool): Whether to check for binary compliance.
+            encoding (bool): Whether to check for encoding or binary compliance.
 
         Raises:
             Warning: If the dictionary does not comply with the rules.
         """
-        if for_binary:
-            if not self.all_binary(data):
-                raise Warning("", "Nur 0 und 1 erlaubt!")
-        else:
+        if encoding:
             self.encode_data(data)
+        elif not self.all_binary(data):
+            raise Warning("", "Nur 0 und 1 erlaubt!")
+
 
 _bicoder = None
 def get_bicoder():

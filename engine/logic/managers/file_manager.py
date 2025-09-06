@@ -113,7 +113,22 @@ class FileManager:
         with open(filepath, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    def append_network(self, text):
+    def pad_network(self, divisor):
+        """
+        Pads the network file with 0s to ensure a minimum number of bits.
+
+        Raises:
+            FileNotFoundError: If the network file does not exist.
+        """
+        with open(self.__network_path, "r+", encoding="utf-8") as f:
+            content = f.read()
+            while len(content) % divisor != 0:  # Ensure bit length is a multiple of divisor
+                content += "0"
+            f.seek(0)
+            f.write(content)
+            f.truncate()
+
+    def append_network(self, text, divisor=0):
         """
         Appends text to the network file.
 
@@ -123,6 +138,8 @@ class FileManager:
         Raises:
             FileNotFoundError: If the network file does not exist.
         """
+        if divisor:
+            self.pad_network(divisor)
         with open(self.__network_path, "a", encoding="utf-8") as f:
             f.write(text)
 

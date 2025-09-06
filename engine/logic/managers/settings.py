@@ -54,7 +54,9 @@ class ProtoSettings:
         if not data:
             return False
         for x in data:
-            if x=="network":
+            if x=="encoding":  # special case for filter and signature
+                continue
+            elif x=="network":
                 filemanager().update(network=data[x])
             elif x=="eol":
                 bicoder().update_eol(eol=data[x])
@@ -65,9 +67,15 @@ class ProtoSettings:
             elif x=="code_dict":
                 bicoder().update_dict(code_dict=data[x])
             elif x=="filter":
-                filter().update(filter=data[x])
+                if "encoding" in data:
+                    filter().update(filter=data[x], words=data["encoding"])
+                else:
+                    print("Achtung: Kein Encoding-Status übergeben, Filter wird nicht aktualisiert!")
             elif x=="signature":
-                signature().update(signature=data[x])
+                if "encoding" in data:
+                    signature().update(signature=data[x], words=data["encoding"])
+                else:
+                    print("Achtung: Kein Encoding-Status übergeben, Signatur wird nicht aktualisiert!")
             elif x=="stats":
                 stats().update(data[x])
             elif x=="progress":
@@ -118,7 +126,9 @@ class ProtoSettings:
             return {}
         data={}
         for x in keys:
-            if x=="network":
+            if x=="encoding":  # special case for filter and signature
+                continue
+            elif x=="network":
                 data[x] = filemanager().network
             elif x=="eol":
                 data[x] = bicoder().eol
@@ -192,20 +202,21 @@ class ProtoSettings:
         
     
     ## CHECK data integrity
-    def check_integrity(self, on_keys, for_binary):
+    def check_integrity(self, on_keys, encoding):
         """
         Check the integrity of the data based on the provided keys.
         
         Parameters:
             on_keys (list): List of keys to check for integrity.
-            for_binary (bool): Whether to check for binary compatibility.
-        Returns:
-            None
+            encoding (bool): Whether to check for encoding or binary compliance.
+        
+        Raises:
+            Warning: If the integrity check fails.
         """
         word_fields = ["filter", "signature"]
         coding_fields = ["code_text", "eol"]
         if any (x in on_keys for x in coding_fields) or any (x in on_keys for x in word_fields):
-            bicoder().check_dict_compliance(self.collect_data(word_fields), for_binary = for_binary)
+            bicoder().check_dict_compliance(self.collect_data(word_fields), encoding=encoding)
 
 _settings = None
 def get_settings():
