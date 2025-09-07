@@ -52,6 +52,13 @@ class DisplayFrame(ttk.Frame):
         """
 
         def insert(display, content, replace=True):
+            """Insert content into a text field.
+            
+            Parameters:
+                display: The text field to insert content into.
+                content: The content to insert.
+                replace (bool): Whether to replace existing content or append.
+            """
             display.config(state="normal")
             if replace:
                 display.delete("1.0", tk.END)

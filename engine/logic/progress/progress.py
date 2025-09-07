@@ -1,3 +1,4 @@
+import os
 from . import Challenge, FillBlanks, Level
 
 class ProtoProgress:
@@ -189,7 +190,9 @@ class ProtoProgress:
             dict: A dictionary containing the levels, where the keys are level IDs and the values are ProtoLevel objects.
         """
         from .. import filemanager
-        levelsdata = filemanager().load_json("data/.progress.json")
+        basedir = os.path.dirname(__file__)
+        self.__progress_path = os.path.join(basedir, ".progress.json")
+        levelsdata = filemanager().load_json(self.__progress_path)
 
         levels = {}
         for levelid, level in levelsdata.items():

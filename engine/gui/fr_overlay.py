@@ -71,7 +71,7 @@ class JournalFrame(ttk.Frame):
         # XP bar
         self.xp_bar = ttk.Progressbar(master, orient="horizontal", length=200, mode="determinate")
         self.xp_bar.grid(row=0, column=0, padx=10, pady=10)
-        self.XP_label = ttk.Label(master, text="EP: "+str(self.xp_bar['value'])+"/max")
+        self.XP_label = ttk.Label(master, text="EP")
         self.XP_label.grid(row=1, column=0, sticky="w")
     
         # Unlocked achievements list
@@ -134,7 +134,7 @@ class JournalFrame(ttk.Frame):
             self.xp_bar['value'] = self.xp_value*100/self.xp_max
         if "xp_max" in data:
             self.xp_max = data["xp_max"]
-            self.XP_label.config(text=f"EP: {self.xp_value}/{self.xp_max}")
+            self.XP_label.config(text=f"Erfahrungspunkte: {self.xp_value}/{self.xp_max}")
         if "achievements" in data:
             if "locked" in data["achievements"]:
                 locked_achievements = data["achievements"]["locked"]

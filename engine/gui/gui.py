@@ -3,6 +3,11 @@ from tkinter import ttk, filedialog, simpledialog  # Import specific tkinter mod
 
 
 class ProtoGUI:
+    """
+    The main GUI class for the ProtoType application.
+
+    Manages the layout, widgets, and user interactions.
+    """
     def __init__(self):
         """
         Initialize the GUI default values.
@@ -27,7 +32,6 @@ class ProtoGUI:
         self.__root = tk.Tk() # Create the main window
         self.__root.title("ProtoType - Messenger")  # Set window title
         self.__root.geometry("1000x600")
-        self.__root.iconbitmap('./engine/gui/favicon.ico')
         self.__root.resizable(True, True)
 
         # Fill the GUI
@@ -196,10 +200,18 @@ class ProtoGUI:
 
     def choose_username(self):
         """
-        Prompt the user to choose a username.
+        Prompt the user to choose a username and a network file.
         """
-        name = simpledialog.askstring("Benutzername", "Bitte gib einen Nutzernamen an: ")  # Open file dialog
+        name = simpledialog.askstring("Benutzername", "Bitte gib einen Nutzernamen an: ")
         self.flow.gui_change(data={"username":name})
+
+        # Direkt im Anschluss Netzwerkdatei abfragen
+        netpath = filedialog.askopenfilename(
+            title="Netzwerk auswählen",
+            filetypes=[("Netzwerkdatei", "*.net"), ("Alle Dateien", "*")]
+        )
+        if netpath:
+            self.flow.gui_change(data={"network":netpath})
 
     def choose_allload(self):
         """

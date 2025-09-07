@@ -10,7 +10,10 @@ class FileManager:
         """
         Initializes the FileManager with default values.
         """
-        self.__network_path = "./data/wan.net"  # Default path for the network file
+        
+        # Display the appli
+        import os
+        self.__network_path = os.path.join("data", "wan.net")  # Default path for the network file
         self._last_checked_timestamp = 0
 
     
@@ -22,7 +25,7 @@ class FileManager:
             network (str): The new network path.
         """
         if network:
-            self.__network_path = network
+            self.__network_path = os.path.abspath(os.path.normpath(network))
             self._ensure_file_exists(self.__network_path)  # Ensure the selected file exists
             self._last_checked_timestamp = 0
 
@@ -48,6 +51,7 @@ class FileManager:
         """
         if not os.path.exists(filepath):  # Check if file does not exist
             try:
+                os.makedirs(os.path.dirname(filepath), exist_ok=True)  # Ensure parent directories exist
                 with open(filepath, "w", encoding="utf-8") as f:  # Open file in write mode
                     f.write("")  # Create an empty file
             except Exception as e:
@@ -142,6 +146,8 @@ class FileManager:
             self.pad_network(divisor)
         with open(self.__network_path, "a", encoding="utf-8") as f:
             f.write(text)
+            f.flush()               # empties python buffers into the OS buffers
+            os.fsync(f.fileno())    # empties OS buffers into the disk
 
     def save_file(self, filepath, text):
         """

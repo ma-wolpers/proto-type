@@ -27,7 +27,7 @@ class ButtonsFrame(ttk.Frame):
         self.transform_gui = transform_gui
 
         # Button to enforce a reload of the file content
-        self.btn_network_reload = ttk.Button(self, text="Neuladen", command=self.flow.network_reload)  # Create button to apply filter
+        self.btn_network_reload = ttk.Button(self, text="Aktualisieren", command=self.flow.network_reload)  # Create button to apply filter
         self.btn_network_reload.grid(row=0, column=0, sticky="news", pady=5)  # Place button in grid
         
         # Toggle button to switch between buttons and textfield

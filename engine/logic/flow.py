@@ -2,6 +2,11 @@ from . import bicoder, filemanager, filter, signature, stats, progress, settings
 from .. import gui
 
 class ProtoFlow:
+    """
+    The main flow controller for the ProtoType application.
+
+    Manages the overall application state, user interactions, and coordinates between different components.
+    """
     def __init__(self):
         """
         Initialize the ProtoFlow class.

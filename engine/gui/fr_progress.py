@@ -55,6 +55,12 @@ class ProgressFrame(ttk.Frame):
         self.grid_columnconfigure(1, weight=0)
 
     def update_on(self, data):
+        """
+        Update the displayed information based on the provided data.
+        
+        Parameters:
+            data (dict): A dictionary containing the data to update the display.
+        """
         if "level" in data:
             self.lvl_title.config(text=data['level']['title'])
         if "challenge" in data:

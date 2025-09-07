@@ -10,4 +10,6 @@ __pycache__/
 
 # Virtuelle Umgebung
 .venv/
-data
+
+# Daten
+/data

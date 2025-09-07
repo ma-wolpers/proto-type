@@ -15,6 +15,12 @@ class ProtoStats:
 
     @property
     def sentmsgcount(self):
+        """
+        Returns the count of sent messages.
+
+        Returns:
+            int: The count of sent messages.
+        """
         return self._sentmsgcount
 
     @property

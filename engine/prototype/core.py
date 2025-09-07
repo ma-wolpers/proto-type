@@ -2,6 +2,9 @@ from engine import gui, Flow
 
 # Main application class
 class ProtoType:
+    """
+    The main application class for the ProtoType project.
+    """
     def __init__(self):
         """
         Initialize the main application.
