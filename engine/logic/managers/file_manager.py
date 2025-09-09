@@ -119,8 +119,10 @@ class FileManager:
 
     def pad_network(self, divisor):
         """
-        Pads the network file with 0s to ensure a minimum number of bits.
+        Pads the network file with 0s to ensure a number of bits that is a multiple of the divisor.
 
+        Parameters:
+            divisor (int): The divisor to ensure the bit length is a multiple of.
         Raises:
             FileNotFoundError: If the network file does not exist.
         """
