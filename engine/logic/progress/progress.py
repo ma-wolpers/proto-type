@@ -76,12 +76,10 @@ class ProtoProgress:
                 'title': '',
                 'descr': ''
             }
-        title = chlg.title
-        descr = chlg.descr
         return {
             'id': self._chlng_id,
-            'title': title,
-            'descr': descr
+            'title': chlg.title,
+            'descr': chlg.descr
         }
 
     def update(self, data):

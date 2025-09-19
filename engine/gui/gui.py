@@ -249,6 +249,9 @@ class ProtoGUI:
     def update(self, data={}):
         """
         Update the GUI elements based on the provided data.
+
+        Parameters:
+            data (dict): A dictionary containing the data to update the GUI elements.
         """
         if any(x in data for x in ("xp","xp_max","achievements")):
             self.overlay_frame.update_on(data)

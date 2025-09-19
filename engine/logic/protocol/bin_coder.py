@@ -300,7 +300,7 @@ class BinaryCoder:
         maxwordlength = max(len(word) for word in self.__code_dict.keys())
         while i < len(text):
             if text[i] == "\n":
-                binary_code += self.__eol
+                binary_code = self.append_eol(binary_code)
                 i += 1
             for length in range(maxwordlength, 0, -1): # Check for the longest word first
                 if text[i:i+length] in self.__code_dict:
@@ -428,7 +428,7 @@ class BinaryCoder:
 
     def append_eol(self, text):
         """
-        Append the end-of-line marker to the text.
+        Append the end-of-line marker to the end of the text.
 
         Parameters:
             text (str): The text to append the end-of-line marker to.
@@ -437,6 +437,18 @@ class BinaryCoder:
             str: The text with the end-of-line marker appended.
         """
         return text+self.__eol
+    
+    def prepend_eol(self, text):
+        """
+        Prepend the end-of-line marker to the beginning of the text.
+
+        Parameters:
+            text (str): The text to prepend the end-of-line marker to.
+
+        Returns:
+            str: The text with the end-of-line marker prepended.
+        """
+        return self.__eol+text
 
     def split_eol(self, binary_code):
         """

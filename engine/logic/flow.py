@@ -178,7 +178,7 @@ class ProtoFlow:
         # Encode the text line by line
         if self.encoding:
             text = _bicoder.encode_text(text)
-        text = _bicoder.append_eol(text)
+        text = _bicoder.prepend_eol(_bicoder.append_eol(text))
 
         # Clear input field
         _gui.clear_input()
